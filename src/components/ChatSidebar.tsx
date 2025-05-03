@@ -5,7 +5,8 @@ import { User } from "@/data/sampleData";
 import { UserAvatar } from "./UserAvatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, MessageCircle, Users } from "lucide-react";
+import { ChevronLeft, ChevronRight, MessageCircle, Users, Circle } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ChatSidebarProps {
   users: User[];
@@ -27,6 +28,8 @@ export function ChatSidebar({ users, currentUser }: ChatSidebarProps) {
     }
     return a.name.localeCompare(b.name);
   });
+
+  const onlineUsers = sortedUsers.filter(user => user.isOnline).length;
 
   return (
     <div className={cn(
@@ -87,8 +90,18 @@ export function ChatSidebar({ users, currentUser }: ChatSidebarProps) {
         </div>
       )}
 
+      {/* Online status indicator */}
+      {!isCollapsed && (
+        <div className="p-4 border-b border-gray-200">
+          <div className="flex items-center gap-2">
+            <Circle size={10} className="text-green-500 fill-current" />
+            <span className="text-sm">{onlineUsers} online</span>
+          </div>
+        </div>
+      )}
+
       {/* User list */}
-      <div className="flex-1 overflow-y-auto">
+      <ScrollArea className="flex-1">
         <div className={cn(
           "p-2",
           isCollapsed && "flex flex-col items-center"
@@ -108,7 +121,8 @@ export function ChatSidebar({ users, currentUser }: ChatSidebarProps) {
               <div 
                 key={user.id}
                 className={cn(
-                  "flex items-center gap-3 p-2 rounded-md hover:bg-white cursor-pointer",
+                  "flex items-center gap-3 p-2 rounded-md hover:bg-white cursor-pointer transition-colors duration-200",
+                  user.isOnline && "bg-gray-50",
                   isCollapsed && "justify-center"
                 )}
               >
@@ -121,7 +135,10 @@ export function ChatSidebar({ users, currentUser }: ChatSidebarProps) {
                 {!isCollapsed && (
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate">{user.name}</p>
-                    <p className="text-xs text-gray-500">
+                    <p className={cn(
+                      "text-xs",
+                      user.isOnline ? "text-green-500" : "text-gray-500"
+                    )}>
                       {user.isOnline ? "Online" : "Offline"}
                     </p>
                   </div>
@@ -130,7 +147,7 @@ export function ChatSidebar({ users, currentUser }: ChatSidebarProps) {
             ))}
           </div>
         </div>
-      </div>
+      </ScrollArea>
     </div>
   );
 }
