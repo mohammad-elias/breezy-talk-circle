@@ -8,6 +8,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (userId: string, password: string) => Promise<boolean>;
   logout: () => void;
+  signup: (name: string, email: string, password: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -58,6 +59,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const signup = async (name: string, email: string, password: string): Promise<boolean> => {
+    // In a real app, this would register a new user in the backend
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        // Create a new user with a random ID
+        const userId = `user-${Date.now()}`;
+        const newUser = { 
+          ...currentUser, 
+          id: userId, 
+          name: name,
+          avatar: `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}` 
+        };
+        
+        setUser(newUser);
+        setIsAuthenticated(true);
+        localStorage.setItem("chatUser", JSON.stringify(newUser));
+        
+        resolve(true);
+      }, 1500); // Simulate network request
+    });
+  };
+
   const logout = () => {
     setUser(null);
     setIsAuthenticated(false);
@@ -66,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser: user, isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ currentUser: user, isAuthenticated, login, logout, signup }}>
       {children}
     </AuthContext.Provider>
   );

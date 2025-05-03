@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ const Login = () => {
     try {
       const success = await login(userId, password);
       if (success) {
-        navigate("/");
+        navigate("/chats");
       }
     } finally {
       setIsLoading(false);
@@ -74,8 +74,16 @@ const Login = () => {
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="flex justify-center text-sm text-gray-500">
-          Use the provided test credentials to log in
+        <CardFooter className="flex flex-col gap-2">
+          <p className="text-sm text-gray-500">
+            Don't have an account?{" "}
+            <Link to="/signup" className="text-chat-primary hover:underline">
+              Sign up
+            </Link>
+          </p>
+          <p className="text-xs text-gray-500 text-center">
+            Use the test credentials below for demo purposes
+          </p>
         </CardFooter>
       </Card>
       

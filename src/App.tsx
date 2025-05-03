@@ -7,6 +7,10 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import UsersList from "./pages/UsersList";
+import ChatsList from "./pages/ChatsList";
+import ChatView from "./pages/ChatView";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,14 +32,40 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/login" element={
-        isAuthenticated ? <Navigate to="/" replace /> : <Login />
+        isAuthenticated ? <Navigate to="/chats" replace /> : <Login />
       } />
+      <Route path="/signup" element={
+        isAuthenticated ? <Navigate to="/chats" replace /> : <Signup />
+      } />
+      
+      {/* Protected routes */}
       <Route path="/" element={
+        <ProtectedRoute>
+          <Navigate to="/chats" replace />
+        </ProtectedRoute>
+      } />
+      <Route path="/index" element={
         <ProtectedRoute>
           <Index />
         </ProtectedRoute>
       } />
-      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+      <Route path="/chats" element={
+        <ProtectedRoute>
+          <ChatsList />
+        </ProtectedRoute>
+      } />
+      <Route path="/users" element={
+        <ProtectedRoute>
+          <UsersList />
+        </ProtectedRoute>
+      } />
+      <Route path="/chat/:chatId" element={
+        <ProtectedRoute>
+          <ChatView />
+        </ProtectedRoute>
+      } />
+      
+      {/* Catch-all route */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
