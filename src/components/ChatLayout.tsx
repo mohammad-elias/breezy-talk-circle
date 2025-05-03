@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
-import { users as initialUsers, currentUser, messages as initialMessages, Message, User } from "@/data/sampleData";
+import { users as initialUsers, messages as initialMessages, Message, User } from "@/data/sampleData";
+import { useAuth } from "@/context/AuthContext";
 import { ChatSidebar } from "./ChatSidebar";
 import { ChatHeader } from "./ChatHeader";
 import { MessageList } from "./MessageList";
@@ -12,6 +13,7 @@ import { TestCredentials } from "./TestCredentials";
 export function ChatLayout() {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [users, setUsers] = useState<User[]>(initialUsers);
+  const { currentUser, logout } = useAuth();
   
   // Set up WebSocket connection and handlers
   const { sendMessage: sendWebSocketMessage, isConnected, updateUserStatus } = useWebSocket((newMessage) => {
@@ -33,6 +35,8 @@ export function ChatLayout() {
   }, [isConnected]);
 
   const handleSendMessage = (text: string) => {
+    if (!currentUser) return;
+    
     const newMessage: Message = {
       id: `m${Date.now()}`,
       userId: currentUser.id,
@@ -45,12 +49,18 @@ export function ChatLayout() {
     toast("Message sent successfully!");
   };
 
+  if (!currentUser) return null;
+
   return (
     <div className="flex h-screen bg-gray-100 overflow-hidden">
-      <ChatSidebar users={users} currentUser={currentUser} />
+      <ChatSidebar 
+        users={users} 
+        currentUser={currentUser} 
+        onLogout={logout}
+      />
       
       <div className="flex-1 flex flex-col overflow-hidden">
-        <ChatHeader activeUsers={[currentUser, ...users.filter(u => u.isOnline)]} />
+        <ChatHeader activeUsers={[currentUser, ...users.filter(u => u.isOnline)]} onLogout={logout} />
         <MessageList messages={messages} />
         <MessageInput 
           onSendMessage={handleSendMessage} 

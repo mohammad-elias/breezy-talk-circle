@@ -5,15 +5,16 @@ import { User } from "@/data/sampleData";
 import { UserAvatar } from "./UserAvatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, MessageCircle, Users, Circle } from "lucide-react";
+import { ChevronLeft, ChevronRight, LogOut, MessageCircle, Users, Circle } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ChatSidebarProps {
   users: User[];
   currentUser: User;
+  onLogout: () => void;
 }
 
-export function ChatSidebar({ users, currentUser }: ChatSidebarProps) {
+export function ChatSidebar({ users, currentUser, onLogout }: ChatSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -148,6 +149,25 @@ export function ChatSidebar({ users, currentUser }: ChatSidebarProps) {
           </div>
         </div>
       </ScrollArea>
+
+      {/* Logout button */}
+      <div className={cn(
+        "p-4 border-t border-gray-200",
+        isCollapsed ? "flex justify-center" : ""
+      )}>
+        <Button 
+          variant="ghost" 
+          size={isCollapsed ? "icon" : "sm"}
+          onClick={onLogout}
+          className={cn(
+            "text-gray-500 hover:text-red-500",
+            !isCollapsed && "w-full justify-start"
+          )}
+        >
+          <LogOut size={18} className={cn(!isCollapsed && "mr-2")} />
+          {!isCollapsed && "Logout"}
+        </Button>
+      </div>
     </div>
   );
 }
