@@ -7,6 +7,7 @@ import { MessageList } from "./MessageList";
 import { MessageInput } from "./MessageInput";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { toast } from "@/components/ui/sonner";
+import { TestCredentials } from "./TestCredentials";
 
 export function ChatLayout() {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
@@ -56,6 +57,9 @@ export function ChatLayout() {
           isConnected={isConnected}
         />
       </div>
+      
+      {/* Test credentials component */}
+      <TestCredentials />
     </div>
   );
 }
