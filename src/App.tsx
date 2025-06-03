@@ -11,6 +11,9 @@ import Signup from "./pages/Signup";
 import UsersList from "./pages/UsersList";
 import ChatsList from "./pages/ChatsList";
 import ChatView from "./pages/ChatView";
+import Groups from "./pages/Groups";
+import NewChat from "./pages/NewChat";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
