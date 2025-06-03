@@ -10,12 +10,12 @@ export function TestCredentials() {
   const [isCopied2, setIsCopied2] = useState(false);
 
   const credentials = [
-    { userId: "1", password: "user1password", name: "Sarah Johnson" },
-    { userId: "2", password: "user2password", name: "Michael Chen" }
+    { email: "sarah@example.com", password: "user1password", name: "Sarah Johnson" },
+    { email: "michael@example.com", password: "user2password", name: "Michael Chen" }
   ];
 
-  const handleCopyCredentials = (userId: string, password: string, index: number) => {
-    navigator.clipboard.writeText(`User ID: ${userId}\nPassword: ${password}`);
+  const handleCopyCredentials = (email: string, password: string, index: number) => {
+    navigator.clipboard.writeText(`Email: ${email}\nPassword: ${password}`);
     
     if (index === 0) {
       setIsCopied1(true);
@@ -33,15 +33,15 @@ export function TestCredentials() {
       <div className="text-sm font-medium mb-2">Test Credentials</div>
       
       {credentials.map((cred, index) => (
-        <div key={cred.userId} className="mb-2 text-xs border-b pb-2 last:border-b-0 last:pb-0 last:mb-0">
+        <div key={cred.email} className="mb-2 text-xs border-b pb-2 last:border-b-0 last:pb-0 last:mb-0">
           <div className="font-medium">{cred.name}</div>
-          <div>User ID: <span className="font-mono bg-gray-100 px-1">{cred.userId}</span></div>
+          <div>Email: <span className="font-mono bg-gray-100 px-1">{cred.email}</span></div>
           <div>Password: <span className="font-mono bg-gray-100 px-1">{cred.password}</span></div>
           <Button 
             variant="outline"
             size="sm"
             className="mt-1 h-7 text-xs w-full"
-            onClick={() => handleCopyCredentials(cred.userId, cred.password, index)}
+            onClick={() => handleCopyCredentials(cred.email, cred.password, index)}
           >
             {index === 0 && isCopied1 || index === 1 && isCopied2 ? (
               <>
