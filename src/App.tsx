@@ -67,6 +67,21 @@ const AppRoutes = () => {
           <ChatView />
         </ProtectedRoute>
       } />
+      <Route path="/groups" element={
+        <ProtectedRoute>
+          <Groups />
+        </ProtectedRoute>
+      } />
+      <Route path="/new-chat" element={
+        <ProtectedRoute>
+          <NewChat />
+        </ProtectedRoute>
+      } />
+      <Route path="/settings" element={
+        <ProtectedRoute>
+          <Settings />
+        </ProtectedRoute>
+      } />
       
       {/* Catch-all route */}
       <Route path="*" element={<NotFound />} />
