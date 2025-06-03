@@ -35,6 +35,9 @@ const AppRoutes = () => {
   
   return (
     <Routes>
+      <Route path="/" element={
+        isAuthenticated ? <Navigate to="/chats" replace /> : <Landing />
+      } />
       <Route path="/login" element={
         isAuthenticated ? <Navigate to="/chats" replace /> : <Login />
       } />
