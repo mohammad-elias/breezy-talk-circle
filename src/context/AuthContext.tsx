@@ -6,7 +6,7 @@ import { toast } from "@/components/ui/sonner";
 interface AuthContextType {
   currentUser: User | null;
   isAuthenticated: boolean;
-  login: (userId: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   signup: (name: string, email: string, password: string) => Promise<boolean>;
 }
@@ -32,19 +32,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const login = async (userId: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string): Promise<boolean> => {
     // In a real app, this would be an API call to your backend
     return new Promise((resolve) => {
       setTimeout(() => {
         // Basic validation for demo purposes
-        if (userId === "1" && password === "user1password") {
+        if (email === "sarah@example.com" && password === "user1password") {
           const loggedInUser = { ...currentUser, id: "1", name: "Sarah Johnson", avatar: "https://i.pravatar.cc/150?img=1" };
           setUser(loggedInUser);
           setIsAuthenticated(true);
           localStorage.setItem("chatUser", JSON.stringify(loggedInUser));
           toast.success("Logged in successfully");
           resolve(true);
-        } else if (userId === "2" && password === "user2password") {
+        } else if (email === "michael@example.com" && password === "user2password") {
           const loggedInUser = { ...currentUser, id: "2", name: "Michael Chen", avatar: "https://i.pravatar.cc/150?img=8" };
           setUser(loggedInUser);
           setIsAuthenticated(true);

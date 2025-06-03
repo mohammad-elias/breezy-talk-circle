@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { TestCredentials } from "@/components/TestCredentials";
 
 const Login = () => {
-  const [userId, setUserId] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
@@ -19,7 +19,7 @@ const Login = () => {
     setIsLoading(true);
     
     try {
-      const success = await login(userId, password);
+      const success = await login(email, password);
       if (success) {
         navigate("/chats");
       }
@@ -40,15 +40,15 @@ const Login = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <label htmlFor="userId" className="text-sm font-medium">
-                User ID
+              <label htmlFor="email" className="text-sm font-medium">
+                Email
               </label>
               <Input
-                id="userId"
-                type="text"
-                value={userId}
-                onChange={(e) => setUserId(e.target.value)}
-                placeholder="Enter your user ID"
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
                 required
               />
             </div>
