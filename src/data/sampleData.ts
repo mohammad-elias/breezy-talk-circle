@@ -13,6 +13,14 @@ export interface Message {
   timestamp: Date;
 }
 
+export interface Connection {
+  id: string;
+  fromUserId: string;
+  toUserId: string;
+  status: 'pending' | 'accepted' | 'declined';
+  createdAt: Date;
+}
+
 export const users: User[] = [
   {
     id: "1",
@@ -44,6 +52,24 @@ export const users: User[] = [
     avatar: "https://i.pravatar.cc/150?img=9",
     isOnline: false,
   },
+  {
+    id: "6",
+    name: "David Kim",
+    avatar: "https://i.pravatar.cc/150?img=6",
+    isOnline: true,
+  },
+  {
+    id: "7",
+    name: "Lisa Zhang",
+    avatar: "https://i.pravatar.cc/150?img=7",
+    isOnline: false,
+  },
+  {
+    id: "8",
+    name: "Alex Thompson",
+    avatar: "https://i.pravatar.cc/150?img=4",
+    isOnline: true,
+  },
 ];
 
 export const currentUser: User = {
@@ -52,6 +78,31 @@ export const currentUser: User = {
   avatar: "https://i.pravatar.cc/150?img=11",
   isOnline: true,
 };
+
+// Sample connections data
+export const connections: Connection[] = [
+  {
+    id: "c1",
+    fromUserId: "0",
+    toUserId: "1",
+    status: "accepted",
+    createdAt: new Date("2023-05-01T10:00:00"),
+  },
+  {
+    id: "c2",
+    fromUserId: "2",
+    toUserId: "0",
+    status: "pending",
+    createdAt: new Date("2023-05-02T14:30:00"),
+  },
+  {
+    id: "c3",
+    fromUserId: "0",
+    toUserId: "4",
+    status: "accepted",
+    createdAt: new Date("2023-05-01T16:45:00"),
+  },
+];
 
 export const messages: Message[] = [
   {

@@ -5,8 +5,11 @@ import { User } from "@/data/sampleData";
 import { UserAvatar } from "./UserAvatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight, LogOut, MessageCircle, Users, Circle } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useAuth } from "@/context/AuthContext";
+import { useConnections } from "@/hooks/useConnections";
 
 interface ChatSidebarProps {
   users: User[];
@@ -17,20 +20,32 @@ interface ChatSidebarProps {
 export function ChatSidebar({ users, currentUser, onLogout }: ChatSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const { getConnectionStatus, getPendingRequests } = useConnections(currentUser.id);
 
   const filteredUsers = users.filter((user) => 
     user.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Sort users: online first, then alphabetically
+  // Sort users: connected and online first, then alphabetically
   const sortedUsers = [...filteredUsers].sort((a, b) => {
+    const aConnected = getConnectionStatus(a.id) === 'accepted';
+    const bConnected = getConnectionStatus(b.id) === 'accepted';
+    
+    // Prioritize connected users
+    if (aConnected !== bConnected) {
+      return aConnected ? -1 : 1;
+    }
+    
+    // Then prioritize online users
     if (a.isOnline !== b.isOnline) {
       return a.isOnline ? -1 : 1;
     }
+    
     return a.name.localeCompare(b.name);
   });
 
   const onlineUsers = sortedUsers.filter(user => user.isOnline).length;
+  const pendingRequestsCount = getPendingRequests().length;
 
   return (
     <div className={cn(
@@ -83,9 +98,14 @@ export function ChatSidebar({ users, currentUser, onLogout }: ChatSidebarProps) 
               <MessageCircle size={16} className="mr-1" />
               Chats
             </Button>
-            <Button variant="outline" size="sm" className="flex-1">
+            <Button variant="outline" size="sm" className="flex-1 relative">
               <Users size={16} className="mr-1" />
               Users
+              {pendingRequestsCount > 0 && (
+                <Badge variant="secondary" className="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs">
+                  {pendingRequestsCount}
+                </Badge>
+              )}
             </Button>
           </div>
         </div>
@@ -118,34 +138,47 @@ export function ChatSidebar({ users, currentUser, onLogout }: ChatSidebarProps) 
           )}
           
           <div className="mt-2 space-y-1">
-            {sortedUsers.map((user) => (
-              <div 
-                key={user.id}
-                className={cn(
-                  "flex items-center gap-3 p-2 rounded-md hover:bg-white cursor-pointer transition-colors duration-200",
-                  user.isOnline && "bg-gray-50",
-                  isCollapsed && "justify-center"
-                )}
-              >
-                <UserAvatar 
-                  src={user.avatar}
-                  alt={user.name}
-                  isOnline={user.isOnline}
-                  className={cn(isCollapsed && "w-8 h-8")}
-                />
-                {!isCollapsed && (
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{user.name}</p>
-                    <p className={cn(
-                      "text-xs",
-                      user.isOnline ? "text-green-500" : "text-gray-500"
-                    )}>
-                      {user.isOnline ? "Online" : "Offline"}
-                    </p>
-                  </div>
-                )}
-              </div>
-            ))}
+            {sortedUsers.map((user) => {
+              const connectionStatus = getConnectionStatus(user.id);
+              const isConnected = connectionStatus === 'accepted';
+              
+              return (
+                <div 
+                  key={user.id}
+                  className={cn(
+                    "flex items-center gap-3 p-2 rounded-md hover:bg-white cursor-pointer transition-colors duration-200",
+                    user.isOnline && "bg-gray-50",
+                    isConnected && "border border-green-200",
+                    isCollapsed && "justify-center"
+                  )}
+                >
+                  <UserAvatar 
+                    src={user.avatar}
+                    alt={user.name}
+                    isOnline={user.isOnline}
+                    className={cn(isCollapsed && "w-8 h-8")}
+                  />
+                  {!isCollapsed && (
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium truncate">{user.name}</p>
+                        {isConnected && (
+                          <Badge variant="secondary" className="text-xs bg-green-100 text-green-700">
+                            Connected
+                          </Badge>
+                        )}
+                      </div>
+                      <p className={cn(
+                        "text-xs",
+                        user.isOnline ? "text-green-500" : "text-gray-500"
+                      )}>
+                        {user.isOnline ? "Online" : "Offline"}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </ScrollArea>
