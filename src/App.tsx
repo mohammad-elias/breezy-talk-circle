@@ -41,6 +41,8 @@ const AppRoutes = () => {
       <Route path="/" element={
         isAuthenticated ? <Navigate to="/chats" replace /> : <Landing />
       } />
+      <Route path="/features" element={<Features />} />
+      <Route path="/about" element={<About />} />
       <Route path="/login" element={
         isAuthenticated ? <Navigate to="/chats" replace /> : <Login />
       } />
@@ -49,11 +51,6 @@ const AppRoutes = () => {
       } />
       
       {/* Protected routes */}
-      <Route path="/" element={
-        <ProtectedRoute>
-          <Navigate to="/chats" replace />
-        </ProtectedRoute>
-      } />
       <Route path="/index" element={
         <ProtectedRoute>
           <Index />
@@ -77,6 +74,11 @@ const AppRoutes = () => {
       <Route path="/groups" element={
         <ProtectedRoute>
           <Groups />
+        </ProtectedRoute>
+      } />
+      <Route path="/create-group" element={
+        <ProtectedRoute>
+          <CreateGroup />
         </ProtectedRoute>
       } />
       <Route path="/new-chat" element={
