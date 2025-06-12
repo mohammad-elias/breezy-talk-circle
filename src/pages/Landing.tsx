@@ -279,37 +279,36 @@ const Landing = () => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-8 lg:py-12 mt-16 lg:mt-24">
+      <footer className="bg-gray-800 text-white py-12">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-8">
-            <div className="col-span-2 md:col-span-1">
-              <div className="flex items-center space-x-2 mb-4">
-                <MessageCircle className="h-6 w-6 lg:h-8 lg:w-8 text-chat-primary" />
-                <span className="text-lg lg:text-xl font-bold">GossipGo</span>
+          <div className="grid md:grid-cols-4 gap-8">
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <MessageCircle className="h-6 w-6 text-chat-primary" />
+                <span className="text-xl font-bold">GossipGo</span>
               </div>
-              <p className="text-sm lg:text-base text-gray-400">
-                Connecting people through seamless communication.
+              <p className="text-gray-300">
+                Connecting people through seamless communication
               </p>
             </div>
             <div>
-              <h3 className="text-sm lg:text-base font-semibold mb-3 lg:mb-4">Product</h3>
-              <ul className="space-y-2 text-xs lg:text-sm text-gray-400">
-                <li><Link to="/features" className="hover:text-white transition-colors">Features</Link></li>
-                <li><Link to="/about" className="hover:text-white transition-colors">About</Link></li>
+              <h4 className="font-semibold mb-4">Product</h4>
+              <ul className="space-y-2">
+                <li><Link to="/features" className="text-gray-300 hover:text-white">Features</Link></li>
+                <li><span className="text-gray-500">Security</span></li>
               </ul>
             </div>
             <div>
-              <h3 className="text-sm lg:text-base font-semibold mb-3 lg:mb-4">Company</h3>
-              <ul className="space-y-2 text-xs lg:text-sm text-gray-400">
-                <li><Link to="/about" className="hover:text-white transition-colors">About</Link></li>
-                <li><Link to="/contact" className="hover:text-white transition-colors">Contact</Link></li>
+              <h4 className="font-semibold mb-4">Company</h4>
+              <ul className="space-y-2">
+                <li><Link to="/about" className="text-gray-300 hover:text-white">About</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="text-sm lg:text-base font-semibold mb-3 lg:mb-4">Support</h3>
-              <ul className="space-y-2 text-xs lg:text-sm text-gray-400">
-                <li><Link to="/help" className="hover:text-white transition-colors">Help Center</Link></li>
-                <li><Link to="/contact" className="hover:text-white transition-colors">Contact</Link></li>
+              <h4 className="font-semibold mb-4">Support</h4>
+              <ul className="space-y-2">
+                <li><Link to="/help" className="text-gray-300 hover:text-white">Help Center</Link></li>
+                <li><Link to="/contact" className="text-gray-300 hover:text-white">Contact</Link></li>
               </ul>
             </div>
           </div>

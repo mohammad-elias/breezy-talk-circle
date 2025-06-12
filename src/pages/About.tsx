@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,7 +12,7 @@ const About = () => {
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
-            About ChatApp
+            About GossipGo
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             We're on a mission to bring people closer together through seamless communication
@@ -24,7 +23,7 @@ const About = () => {
           <div>
             <h2 className="text-3xl font-bold text-gray-800 mb-6">Our Story</h2>
             <p className="text-gray-600 mb-4">
-              ChatApp was founded with a simple vision: to make communication effortless and enjoyable for everyone. 
+              GossipGo was founded with a simple vision: to make communication effortless and enjoyable for everyone. 
               We believe that staying connected with friends, family, and colleagues should be simple, secure, and fun.
             </p>
             <p className="text-gray-600">

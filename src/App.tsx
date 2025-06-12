@@ -21,6 +21,7 @@ import CreateGroup from "./pages/CreateGroup";
 import NewChat from "./pages/NewChat";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import PasswordReset from "./pages/PasswordReset";
 
 // Protected route wrapper component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -50,6 +51,9 @@ const AppRoutes = () => {
       } />
       <Route path="/signup" element={
         isAuthenticated ? <Navigate to="/chats" replace /> : <Signup />
+      } />
+      <Route path="/password-reset" element={
+        isAuthenticated ? <Navigate to="/chats" replace /> : <PasswordReset />
       } />
       
       {/* Protected routes */}

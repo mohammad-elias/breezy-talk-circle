@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -6,9 +5,11 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { NavBar } from "@/components/NavBar";
 import { MessageCircle, Search, HelpCircle, Users, Shield, Settings } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const HelpCenter = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
 
   const helpCategories = [
     {
@@ -79,6 +80,10 @@ const HelpCenter = () => {
       answer: "If you encounter inappropriate behavior, you can report a user by going to their profile and selecting 'Report User' from the menu options."
     }
   ];
+
+  const handleContactSupport = () => {
+    navigate('/contact');
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-chat-light to-white">
@@ -158,7 +163,10 @@ const HelpCenter = () => {
             <p className="text-gray-600 mb-6">
               Can't find what you're looking for? Our support team is here to help.
             </p>
-            <Button className="bg-chat-primary hover:bg-chat-secondary">
+            <Button 
+              className="bg-chat-primary hover:bg-chat-secondary"
+              onClick={handleContactSupport}
+            >
               Contact Support
             </Button>
           </div>
