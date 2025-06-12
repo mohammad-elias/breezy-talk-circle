@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -286,7 +285,7 @@ const Landing = () => {
             <div className="col-span-2 md:col-span-1">
               <div className="flex items-center space-x-2 mb-4">
                 <MessageCircle className="h-6 w-6 lg:h-8 lg:w-8 text-chat-primary" />
-                <span className="text-lg lg:text-xl font-bold">ChatApp</span>
+                <span className="text-lg lg:text-xl font-bold">GossipGo</span>
               </div>
               <p className="text-sm lg:text-base text-gray-400">
                 Connecting people through seamless communication.
@@ -297,28 +296,25 @@ const Landing = () => {
               <ul className="space-y-2 text-xs lg:text-sm text-gray-400">
                 <li><Link to="/features" className="hover:text-white transition-colors">Features</Link></li>
                 <li><Link to="/about" className="hover:text-white transition-colors">About</Link></li>
-                <li><a href="#" className="hover:text-white transition-colors">Security</a></li>
               </ul>
             </div>
             <div>
               <h3 className="text-sm lg:text-base font-semibold mb-3 lg:mb-4">Company</h3>
               <ul className="space-y-2 text-xs lg:text-sm text-gray-400">
                 <li><Link to="/about" className="hover:text-white transition-colors">About</Link></li>
-                <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
+                <li><Link to="/contact" className="hover:text-white transition-colors">Contact</Link></li>
               </ul>
             </div>
             <div>
               <h3 className="text-sm lg:text-base font-semibold mb-3 lg:mb-4">Support</h3>
               <ul className="space-y-2 text-xs lg:text-sm text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Documentation</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Status</a></li>
+                <li><Link to="/help" className="hover:text-white transition-colors">Help Center</Link></li>
+                <li><Link to="/contact" className="hover:text-white transition-colors">Contact</Link></li>
               </ul>
             </div>
           </div>
           <div className="border-t border-gray-800 mt-6 lg:mt-8 pt-6 lg:pt-8 text-center text-xs lg:text-sm text-gray-400">
-            <p>&copy; 2024 ChatApp. All rights reserved.</p>
+            <p>&copy; 2024 GossipGo. All rights reserved.</p>
           </div>
         </div>
       </footer>

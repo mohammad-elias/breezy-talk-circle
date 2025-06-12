@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,6 +9,8 @@ import Index from "./pages/Index";
 import Landing from "./pages/Landing";
 import Features from "./pages/Features";
 import About from "./pages/About";
+import Contact from "./pages/Contact";
+import HelpCenter from "./pages/HelpCenter";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import UsersList from "./pages/UsersList";
@@ -42,6 +43,8 @@ const AppRoutes = () => {
       } />
       <Route path="/features" element={<Features />} />
       <Route path="/about" element={<About />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/help" element={<HelpCenter />} />
       <Route path="/login" element={
         isAuthenticated ? <Navigate to="/chats" replace /> : <Login />
       } />

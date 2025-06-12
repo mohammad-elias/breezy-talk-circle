@@ -24,7 +24,7 @@ export function NavBar({ variant = 'landing', onLogout, currentUser }: NavBarPro
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <MessageCircle className="h-8 w-8 text-chat-primary" />
-            <span className="text-xl font-bold text-gray-900">ChatApp</span>
+            <span className="text-xl font-bold text-gray-900">GossipGo</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -51,6 +51,12 @@ export function NavBar({ variant = 'landing', onLogout, currentUser }: NavBarPro
                   className="text-gray-600 hover:text-chat-primary transition-colors"
                 >
                   About
+                </Link>
+                <Link 
+                  to="/contact" 
+                  className="text-gray-600 hover:text-chat-primary transition-colors"
+                >
+                  Contact
                 </Link>
                 <div className="flex items-center space-x-4">
                   <Link to="/login">
@@ -149,6 +155,13 @@ export function NavBar({ variant = 'landing', onLogout, currentUser }: NavBarPro
                     onClick={() => setIsMenuOpen(false)}
                   >
                     About
+                  </Link>
+                  <Link 
+                    to="/contact" 
+                    className="text-gray-600 hover:text-chat-primary transition-colors px-4 py-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Contact
                   </Link>
                   <div className="flex flex-col space-y-2 px-4">
                     <Link to="/login" onClick={() => setIsMenuOpen(false)}>
