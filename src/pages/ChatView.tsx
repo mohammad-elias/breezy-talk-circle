@@ -10,6 +10,13 @@ import { ArrowLeft, Info, Phone, Video, MoreHorizontal } from "lucide-react";
 import { MessageInput } from "@/components/MessageInput";
 import { ChatMessage } from "@/components/ChatMessage";
 import { useWebSocket } from "@/hooks/useWebSocket";
+import { toast } from "@/components/ui/sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const ChatView = () => {
   const { chatId } = useParams<{ chatId: string }>();
@@ -58,6 +65,36 @@ const ChatView = () => {
   const handleBack = () => {
     navigate("/chats");
   };
+
+  const handleVoiceCall = () => {
+    toast("Voice call feature will be available when API is integrated");
+    // TODO: Integrate with your voice call API
+  };
+
+  const handleVideoCall = () => {
+    toast("Video call feature will be available when API is integrated");
+    // TODO: Integrate with your video call API
+  };
+
+  const handleChatInfo = () => {
+    toast("Chat info feature will be available when API is integrated");
+    // TODO: Show chat information modal/page
+  };
+
+  const handleMuteChat = () => {
+    toast("Mute notifications feature will be available when API is integrated");
+    // TODO: Integrate mute functionality
+  };
+
+  const handleBlockUser = () => {
+    toast("Block user feature will be available when API is integrated");
+    // TODO: Integrate block user functionality
+  };
+
+  const handleDeleteChat = () => {
+    toast("Delete chat feature will be available when API is integrated");
+    // TODO: Integrate delete chat functionality
+  };
   
   return (
     <DashboardLayout>
@@ -99,18 +136,33 @@ const ChatView = () => {
           </div>
           
           <div className="flex items-center">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" onClick={handleVoiceCall}>
               <Phone size={20} />
             </Button>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" onClick={handleVideoCall}>
               <Video size={20} />
             </Button>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" onClick={handleChatInfo}>
               <Info size={20} />
             </Button>
-            <Button variant="ghost" size="icon">
-              <MoreHorizontal size={20} />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <MoreHorizontal size={20} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-white border shadow-lg">
+                <DropdownMenuItem onClick={handleMuteChat}>
+                  Mute notifications
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleBlockUser}>
+                  Block user
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleDeleteChat} className="text-red-600">
+                  Delete chat
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
         
