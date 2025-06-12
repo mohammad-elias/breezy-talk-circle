@@ -1,4 +1,3 @@
-
 import { useAuth } from "@/context/AuthContext";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
 import { toast } from "@/components/ui/sonner";
-import { User, Settings as SettingsIcon } from "lucide-react";
+import { User, Settings as SettingsIcon, Archive, Trash2 } from "lucide-react";
 
 const Settings = () => {
   const { currentUser } = useAuth();
@@ -18,6 +17,15 @@ const Settings = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  // Mock archived chats data for global settings
+  const globalArchivedChats = [
+    { id: "1", name: "Old Marketing Discussion", lastMessage: "Thanks for the feedback", date: "2024-01-15" },
+    { id: "2", name: "Project Alpha Team", lastMessage: "Meeting completed", date: "2024-01-10" },
+    { id: "3", name: "Sarah Johnson", lastMessage: "See you tomorrow", date: "2024-01-08" },
+    { id: "4", name: "Design Team", lastMessage: "Final mockups attached", date: "2024-01-05" },
+    { id: "5", name: "John Doe", lastMessage: "Great work on the project", date: "2024-01-02" },
+  ];
 
   if (!currentUser) return null;
 
@@ -41,13 +49,23 @@ const Settings = () => {
     setConfirmPassword("");
   };
 
+  const handleUnarchiveChat = (chatId: string, chatName: string) => {
+    toast.success(`${chatName} has been unarchived`);
+    // TODO: Implement unarchive functionality when API is integrated
+  };
+
+  const handleDeleteArchivedChat = (chatId: string, chatName: string) => {
+    toast.success(`${chatName} has been permanently deleted`);
+    // TODO: Implement delete functionality when API is integrated
+  };
+
   return (
     <DashboardLayout>
-      <div className="p-6 max-w-2xl mx-auto">
+      <div className="p-6 max-w-4xl mx-auto">
         <h1 className="text-2xl font-bold mb-6">Settings</h1>
         
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="profile" className="flex items-center gap-2">
               <User size={16} />
               Profile
@@ -55,6 +73,10 @@ const Settings = () => {
             <TabsTrigger value="password" className="flex items-center gap-2">
               <SettingsIcon size={16} />
               Password
+            </TabsTrigger>
+            <TabsTrigger value="archive" className="flex items-center gap-2">
+              <Archive size={16} />
+              Archive
             </TabsTrigger>
           </TabsList>
           
@@ -177,6 +199,66 @@ const Settings = () => {
                 >
                   Change Password
                 </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="archive" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Archive size={20} />
+                  Archived Chats
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-gray-600">
+                      Manage all your archived conversations. You can unarchive or permanently delete them.
+                    </p>
+                    <span className="text-sm text-gray-500">
+                      {globalArchivedChats.length} archived
+                    </span>
+                  </div>
+
+                  <div className="space-y-3">
+                    {globalArchivedChats.map((chat) => (
+                      <div key={chat.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex-1">
+                          <h4 className="font-medium">{chat.name}</h4>
+                          <p className="text-sm text-gray-500">{chat.lastMessage}</p>
+                          <p className="text-xs text-gray-400 mt-1">Archived on {chat.date}</p>
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleUnarchiveChat(chat.id, chat.name)}
+                          >
+                            Unarchive
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeleteArchivedChat(chat.id, chat.name)}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 size={14} />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {globalArchivedChats.length === 0 && (
+                    <div className="text-center py-12 text-gray-500">
+                      <Archive size={48} className="mx-auto mb-4 opacity-50" />
+                      <p>No archived chats</p>
+                      <p className="text-sm mt-2">Archived conversations will appear here</p>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

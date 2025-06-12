@@ -81,8 +81,20 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             "top-16 lg:top-16"
           )}
         >
+          {/* Close button for mobile - positioned to avoid overlap */}
+          <div className="lg:hidden flex justify-end p-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSidebarOpen(false)}
+              className="h-8 w-8"
+            >
+              <X size={16} />
+            </Button>
+          </div>
+
           {/* User profile section */}
-          <div className="p-4 border-b border-gray-200 mt-2 lg:mt-0">
+          <div className="p-4 border-b border-gray-200">
             <div className="flex items-center gap-3">
               <UserAvatar 
                 src={currentUser?.avatar}
