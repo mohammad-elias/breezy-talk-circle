@@ -27,6 +27,7 @@ const ChatsList = () => {
   const navigate = useNavigate();
   const { isConnected } = useWebSocket();
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeFilter, setActiveFilter] = useState<"all" | "groups">("all");
   
   // Sample chats data (in a real app, this would come from a database)
   const [chats, setChats] = useState<Chat[]>([
@@ -68,11 +69,18 @@ const ChatsList = () => {
     }
   ]);
 
-  // Filter chats based on search query
-  const filteredChats = chats.filter(chat => 
-    chat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    chat.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter chats based on search query and active filter
+  const filteredChats = chats
+    .filter(chat => 
+      chat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      chat.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .filter(chat => {
+      if (activeFilter === "groups") {
+        return chat.isGroup;
+      }
+      return true; // "all" shows everything
+    });
   
   // Sort chats: most recent first, then unread
   const sortedChats = [...filteredChats].sort((a, b) => {
@@ -117,19 +125,19 @@ const ChatsList = () => {
           
           <div className="flex gap-2 mt-2">
             <Button 
-              variant="outline" 
+              variant={activeFilter === "all" ? "default" : "outline"}
               size="sm"
               className="rounded-full"
-              onClick={() => navigate("/chats")}
+              onClick={() => setActiveFilter("all")}
             >
               <MessageCircle size={16} className="mr-1" />
               All Chats
             </Button>
             <Button 
-              variant="outline" 
+              variant={activeFilter === "groups" ? "default" : "outline"}
               size="sm"
               className="rounded-full"
-              onClick={() => navigate("/groups")}
+              onClick={() => setActiveFilter("groups")}
             >
               <UsersRound size={16} className="mr-1" />
               Groups
@@ -191,6 +199,15 @@ const ChatsList = () => {
                 </div>
               </Link>
             ))}
+            
+            {sortedChats.length === 0 && (
+              <div className="text-center py-8">
+                <MessageCircle size={48} className="mx-auto text-gray-400 mb-4" />
+                <p className="text-gray-500">
+                  {activeFilter === "groups" ? "No groups found" : "No chats found"}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

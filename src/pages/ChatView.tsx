@@ -11,6 +11,8 @@ import { MessageInput } from "@/components/MessageInput";
 import { ChatMessage } from "@/components/ChatMessage";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { toast } from "@/components/ui/sonner";
+import { CallPopup } from "@/components/CallPopup";
+import { ChatInfo } from "@/components/ChatInfo";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +25,9 @@ const ChatView = () => {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const [showCallPopup, setShowCallPopup] = useState(false);
+  const [callType, setCallType] = useState<"audio" | "video">("audio");
+  const [showChatInfo, setShowChatInfo] = useState(false);
   const { sendMessage: sendWebSocketMessage, isConnected } = useWebSocket((newMessage) => {
     // Add new incoming message
     setMessages(prev => [...prev, newMessage]);
@@ -67,18 +72,17 @@ const ChatView = () => {
   };
 
   const handleVoiceCall = () => {
-    toast("Voice call feature will be available when API is integrated");
-    // TODO: Integrate with your voice call API
+    setCallType("audio");
+    setShowCallPopup(true);
   };
 
   const handleVideoCall = () => {
-    toast("Video call feature will be available when API is integrated");
-    // TODO: Integrate with your video call API
+    setCallType("video");
+    setShowCallPopup(true);
   };
 
   const handleChatInfo = () => {
-    toast("Chat info feature will be available when API is integrated");
-    // TODO: Show chat information modal/page
+    setShowChatInfo(true);
   };
 
   const handleMuteChat = () => {
@@ -186,6 +190,26 @@ const ChatView = () => {
         <MessageInput 
           onSendMessage={handleSendMessage}
           isConnected={isConnected}
+        />
+
+        {/* Call Popup */}
+        <CallPopup
+          isOpen={showCallPopup}
+          onClose={() => setShowCallPopup(false)}
+          callType={callType}
+          userName={isDirectChat ? (targetUser?.name || "User") : groupInfo.name}
+          userAvatar={isDirectChat ? targetUser?.avatar : undefined}
+        />
+
+        {/* Chat Info */}
+        <ChatInfo
+          isOpen={showChatInfo}
+          onClose={() => setShowChatInfo(false)}
+          chatName={isDirectChat ? (targetUser?.name || "User") : groupInfo.name}
+          isGroup={!isDirectChat}
+          participants={isDirectChat ? [] : ["1", "2", "3", "4", "5"]}
+          userAvatar={isDirectChat ? targetUser?.avatar : undefined}
+          isOnline={isDirectChat ? targetUser?.isOnline : undefined}
         />
       </div>
     </DashboardLayout>
