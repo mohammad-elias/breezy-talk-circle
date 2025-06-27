@@ -8,9 +8,25 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "@/components/ui/sonner";
 import { User, Settings as SettingsIcon, Archive, Trash2 } from "lucide-react";
+
+// API Integration Types
+interface ArchivedChat {
+  id: string;
+  name: string;
+  lastMessage: string;
+  date: string;
+}
+
+interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  avatar: string;
+  status: 'online' | 'offline';
+}
 
 const Settings = () => {
   const { currentUser } = useAuth();
@@ -19,24 +35,80 @@ const Settings = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [globalArchivedChats, setGlobalArchivedChats] = useState<ArchivedChat[]>([]);
+  const [isLoadingArchived, setIsLoadingArchived] = useState(false);
 
-  // Mock archived chats data for global settings
-  const globalArchivedChats = [
-    { id: "1", name: "Old Marketing Discussion", lastMessage: "Thanks for the feedback", date: "2024-01-15" },
-    { id: "2", name: "Project Alpha Team", lastMessage: "Meeting completed", date: "2024-01-10" },
-    { id: "3", name: "Sarah Johnson", lastMessage: "See you tomorrow", date: "2024-01-08" },
-    { id: "4", name: "Design Team", lastMessage: "Final mockups attached", date: "2024-01-05" },
-    { id: "5", name: "John Doe", lastMessage: "Great work on the project", date: "2024-01-02" },
-  ];
+  // API Integration: Load archived chats on component mount
+  useEffect(() => {
+    loadArchivedChats();
+  }, []);
+
+  // API Integration: Load archived chats
+  const loadArchivedChats = async () => {
+    setIsLoadingArchived(true);
+    try {
+      // TODO: Replace with actual API call
+      // const response = await fetch('/api/chats/archived', {
+      //   method: 'GET',
+      //   headers: {
+      //     'Authorization': `Bearer ${userToken}`,
+      //     'Content-Type': 'application/json'
+      //   }
+      // });
+      // const data = await response.json();
+      // setGlobalArchivedChats(data.chats);
+      
+      // Mock data for now
+      const mockArchivedChats = [
+        { id: "1", name: "Old Marketing Discussion", lastMessage: "Thanks for the feedback", date: "2024-01-15" },
+        { id: "2", name: "Project Alpha Team", lastMessage: "Meeting completed", date: "2024-01-10" },
+        { id: "3", name: "Sarah Johnson", lastMessage: "See you tomorrow", date: "2024-01-08" },
+        { id: "4", name: "Design Team", lastMessage: "Final mockups attached", date: "2024-01-05" },
+        { id: "5", name: "John Doe", lastMessage: "Great work on the project", date: "2024-01-02" },
+      ];
+      setGlobalArchivedChats(mockArchivedChats);
+    } catch (error) {
+      console.error('Error loading archived chats:', error);
+      toast.error("Failed to load archived chats");
+    } finally {
+      setIsLoadingArchived(false);
+    }
+  };
 
   if (!currentUser) return null;
 
-  const handleSaveProfile = () => {
-    toast.success("Profile updated successfully");
-    setIsEditing(false);
+  // API Integration: Update user profile
+  const handleSaveProfile = async () => {
+    try {
+      // TODO: Replace with actual API call
+      // const response = await fetch('/api/user/profile', {
+      //   method: 'PUT',
+      //   headers: {
+      //     'Authorization': `Bearer ${userToken}`,
+      //     'Content-Type': 'application/json'
+      //   },
+      //   body: JSON.stringify({
+      //     name: name
+      //   })
+      // });
+      
+      // if (!response.ok) {
+      //   throw new Error('Failed to update profile');
+      // }
+      
+      // const updatedUser = await response.json();
+      // Update local state with new user data
+      
+      toast.success("Profile updated successfully");
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast.error("Failed to update profile");
+    }
   };
 
-  const handleChangePassword = () => {
+  // API Integration: Change password
+  const handleChangePassword = async () => {
     if (newPassword !== confirmPassword) {
       toast.error("Passwords don't match");
       return;
@@ -45,20 +117,84 @@ const Settings = () => {
       toast.error("Password must be at least 6 characters");
       return;
     }
-    toast.success("Password changed successfully");
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
+
+    try {
+      // TODO: Replace with actual API call
+      // const response = await fetch('/api/user/change-password', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Authorization': `Bearer ${userToken}`,
+      //     'Content-Type': 'application/json'
+      //   },
+      //   body: JSON.stringify({
+      //     currentPassword: currentPassword,
+      //     newPassword: newPassword
+      //   })
+      // });
+      
+      // if (!response.ok) {
+      //   const errorData = await response.json();
+      //   throw new Error(errorData.message || 'Failed to change password');
+      // }
+      
+      toast.success("Password changed successfully");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      console.error('Error changing password:', error);
+      toast.error("Failed to change password");
+    }
   };
 
-  const handleUnarchiveChat = (chatId: string, chatName: string) => {
-    toast.success(`${chatName} has been unarchived`);
-    // TODO: Implement unarchive functionality when API is integrated
+  // API Integration: Unarchive chat
+  const handleUnarchiveChat = async (chatId: string, chatName: string) => {
+    try {
+      // TODO: Replace with actual API call
+      // const response = await fetch(`/api/chats/${chatId}/unarchive`, {
+      //   method: 'POST',
+      //   headers: {
+      //     'Authorization': `Bearer ${userToken}`,
+      //     'Content-Type': 'application/json'
+      //   }
+      // });
+      
+      // if (!response.ok) {
+      //   throw new Error('Failed to unarchive chat');
+      // }
+      
+      // Remove from archived chats list
+      setGlobalArchivedChats(prev => prev.filter(chat => chat.id !== chatId));
+      toast.success(`${chatName} has been unarchived`);
+    } catch (error) {
+      console.error('Error unarchiving chat:', error);
+      toast.error("Failed to unarchive chat");
+    }
   };
 
-  const handleDeleteArchivedChat = (chatId: string, chatName: string) => {
-    toast.success(`${chatName} has been permanently deleted`);
-    // TODO: Implement delete functionality when API is integrated
+  // API Integration: Delete archived chat
+  const handleDeleteArchivedChat = async (chatId: string, chatName: string) => {
+    try {
+      // TODO: Replace with actual API call
+      // const response = await fetch(`/api/chats/${chatId}`, {
+      //   method: 'DELETE',
+      //   headers: {
+      //     'Authorization': `Bearer ${userToken}`,
+      //     'Content-Type': 'application/json'
+      //   }
+      // });
+      
+      // if (!response.ok) {
+      //   throw new Error('Failed to delete chat');
+      // }
+      
+      // Remove from archived chats list
+      setGlobalArchivedChats(prev => prev.filter(chat => chat.id !== chatId));
+      toast.success(`${chatName} has been permanently deleted`);
+    } catch (error) {
+      console.error('Error deleting chat:', error);
+      toast.error("Failed to delete chat");
+    }
   };
 
   return (
@@ -224,38 +360,44 @@ const Settings = () => {
                     </span>
                   </div>
 
-                  <ScrollArea className="h-96 w-full">
-                    <div className="space-y-3 pr-4">
-                      {globalArchivedChats.map((chat) => (
-                        <div key={chat.id} className="flex items-center justify-between p-4 border rounded-lg">
-                          <div className="flex-1">
-                            <h4 className="font-medium">{chat.name}</h4>
-                            <p className="text-sm text-gray-500">{chat.lastMessage}</p>
-                            <p className="text-xs text-gray-400 mt-1">Archived on {chat.date}</p>
-                          </div>
-                          <div className="flex space-x-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleUnarchiveChat(chat.id, chat.name)}
-                            >
-                              Unarchive
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDeleteArchivedChat(chat.id, chat.name)}
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            >
-                              <Trash2 size={14} />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
+                  {isLoadingArchived ? (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">Loading archived chats...</p>
                     </div>
-                  </ScrollArea>
+                  ) : (
+                    <ScrollArea className="h-96 w-full">
+                      <div className="space-y-3 pr-4">
+                        {globalArchivedChats.map((chat) => (
+                          <div key={chat.id} className="flex items-center justify-between p-4 border rounded-lg">
+                            <div className="flex-1">
+                              <h4 className="font-medium">{chat.name}</h4>
+                              <p className="text-sm text-gray-500">{chat.lastMessage}</p>
+                              <p className="text-xs text-gray-400 mt-1">Archived on {chat.date}</p>
+                            </div>
+                            <div className="flex space-x-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleUnarchiveChat(chat.id, chat.name)}
+                              >
+                                Unarchive
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDeleteArchivedChat(chat.id, chat.name)}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 size={14} />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  )}
 
-                  {globalArchivedChats.length === 0 && (
+                  {globalArchivedChats.length === 0 && !isLoadingArchived && (
                     <div className="text-center py-12 text-gray-500">
                       <Archive size={48} className="mx-auto mb-4 opacity-50" />
                       <p>No archived chats</p>
