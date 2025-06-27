@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
 import { ChatSettings } from "./ChatSettings";
 import { toast } from "@/components/ui/sonner";
+import { useAuth } from "@/context/AuthContext";
 
 interface ChatInfoProps {
   isOpen: boolean;
@@ -16,6 +17,7 @@ interface ChatInfoProps {
   participants?: string[];
   userAvatar?: string;
   isOnline?: boolean;
+  chatId?: string;
 }
 
 export function ChatInfo({ 
@@ -25,34 +27,42 @@ export function ChatInfo({
   isGroup, 
   participants = [], 
   userAvatar,
-  isOnline 
+  isOnline,
+  chatId 
 }: ChatInfoProps) {
   const [showChatSettings, setShowChatSettings] = useState(false);
+  const { userToken } = useAuth();
 
   // API Integration: Start voice call
   const handleVoiceCall = async () => {
+    if (!userToken || !chatId) {
+      toast.error("Authentication required");
+      return;
+    }
+
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/calls/start', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Authorization': `Bearer ${userToken}`,
-      //     'Content-Type': 'application/json'
-      //   },
-      //   body: JSON.stringify({
-      //     chatId: chatId,
-      //     callType: 'voice'
-      //   })
-      // });
+      const response = await fetch('/api/calls/start', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${userToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          chatId: chatId,
+          callType: 'voice'
+        })
+      });
       
-      // if (!response.ok) {
-      //   throw new Error('Failed to start voice call');
-      // }
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to start voice call');
+      }
       
-      // const callData = await response.json();
+      const callData = await response.json();
       // Handle call initiation
+      console.log('Voice call started:', callData);
       
-      toast("Voice call feature will be available when API is integrated");
+      toast.success("Voice call started successfully");
     } catch (error) {
       console.error('Error starting voice call:', error);
       toast.error("Failed to start voice call");
@@ -61,28 +71,34 @@ export function ChatInfo({
 
   // API Integration: Start video call
   const handleVideoCall = async () => {
+    if (!userToken || !chatId) {
+      toast.error("Authentication required");
+      return;
+    }
+
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/calls/start', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Authorization': `Bearer ${userToken}`,
-      //     'Content-Type': 'application/json'
-      //   },
-      //   body: JSON.stringify({
-      //     chatId: chatId,
-      //     callType: 'video'
-      //   })
-      // });
+      const response = await fetch('/api/calls/start', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${userToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          chatId: chatId,
+          callType: 'video'
+        })
+      });
       
-      // if (!response.ok) {
-      //   throw new Error('Failed to start video call');
-      // }
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to start video call');
+      }
       
-      // const callData = await response.json();
+      const callData = await response.json();
       // Handle call initiation
+      console.log('Video call started:', callData);
       
-      toast("Video call feature will be available when API is integrated");
+      toast.success("Video call started successfully");
     } catch (error) {
       console.error('Error starting video call:', error);
       toast.error("Failed to start video call");
@@ -91,19 +107,24 @@ export function ChatInfo({
 
   // API Integration: Archive chat
   const handleArchiveChat = async () => {
+    if (!userToken || !chatId) {
+      toast.error("Authentication required");
+      return;
+    }
+
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch(`/api/chats/${chatId}/archive`, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Authorization': `Bearer ${userToken}`,
-      //     'Content-Type': 'application/json'
-      //   }
-      // });
+      const response = await fetch(`/api/chats/${chatId}/archive`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${userToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
       
-      // if (!response.ok) {
-      //   throw new Error('Failed to archive chat');
-      // }
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to archive chat');
+      }
       
       toast.success(`${chatName} has been archived`);
       onClose();
@@ -115,19 +136,24 @@ export function ChatInfo({
 
   // API Integration: Delete chat
   const handleDeleteChat = async () => {
+    if (!userToken || !chatId) {
+      toast.error("Authentication required");
+      return;
+    }
+
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch(`/api/chats/${chatId}`, {
-      //   method: 'DELETE',
-      //   headers: {
-      //     'Authorization': `Bearer ${userToken}`,
-      //     'Content-Type': 'application/json'
-      //   }
-      // });
+      const response = await fetch(`/api/chats/${chatId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${userToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
       
-      // if (!response.ok) {
-      //   throw new Error('Failed to delete chat');
-      // }
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete chat');
+      }
       
       toast.success(`${chatName} has been deleted`);
       onClose();
@@ -230,6 +256,7 @@ export function ChatInfo({
         onClose={() => setShowChatSettings(false)}
         chatName={chatName}
         isGroup={isGroup}
+        chatId={chatId}
       />
     </>
   );

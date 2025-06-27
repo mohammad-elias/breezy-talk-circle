@@ -29,7 +29,7 @@ interface UserProfile {
 }
 
 const Settings = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, userToken } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(currentUser?.name || "");
   const [currentPassword, setCurrentPassword] = useState("");
@@ -40,25 +40,37 @@ const Settings = () => {
 
   // API Integration: Load archived chats on component mount
   useEffect(() => {
-    loadArchivedChats();
-  }, []);
+    if (userToken) {
+      loadArchivedChats();
+    }
+  }, [userToken]);
 
   // API Integration: Load archived chats
   const loadArchivedChats = async () => {
+    if (!userToken) return;
+    
     setIsLoadingArchived(true);
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/chats/archived', {
-      //   method: 'GET',
-      //   headers: {
-      //     'Authorization': `Bearer ${userToken}`,
-      //     'Content-Type': 'application/json'
-      //   }
-      // });
-      // const data = await response.json();
-      // setGlobalArchivedChats(data.chats);
+      const response = await fetch('/api/chats/archived', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${userToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to load archived chats');
+      }
+
+      const data = await response.json();
+      setGlobalArchivedChats(data.chats || []);
+    } catch (error) {
+      console.error('Error loading archived chats:', error);
+      toast.error("Failed to load archived chats");
       
-      // Mock data for now
+      // Mock data for demo purposes - Remove in production
       const mockArchivedChats = [
         { id: "1", name: "Old Marketing Discussion", lastMessage: "Thanks for the feedback", date: "2024-01-15" },
         { id: "2", name: "Project Alpha Team", lastMessage: "Meeting completed", date: "2024-01-10" },
@@ -67,36 +79,33 @@ const Settings = () => {
         { id: "5", name: "John Doe", lastMessage: "Great work on the project", date: "2024-01-02" },
       ];
       setGlobalArchivedChats(mockArchivedChats);
-    } catch (error) {
-      console.error('Error loading archived chats:', error);
-      toast.error("Failed to load archived chats");
     } finally {
       setIsLoadingArchived(false);
     }
   };
 
-  if (!currentUser) return null;
+  if (!currentUser || !userToken) return null;
 
   // API Integration: Update user profile
   const handleSaveProfile = async () => {
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/user/profile', {
-      //   method: 'PUT',
-      //   headers: {
-      //     'Authorization': `Bearer ${userToken}`,
-      //     'Content-Type': 'application/json'
-      //   },
-      //   body: JSON.stringify({
-      //     name: name
-      //   })
-      // });
+      const response = await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${userToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: name
+        })
+      });
       
-      // if (!response.ok) {
-      //   throw new Error('Failed to update profile');
-      // }
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update profile');
+      }
       
-      // const updatedUser = await response.json();
+      const updatedUser = await response.json();
       // Update local state with new user data
       
       toast.success("Profile updated successfully");
@@ -119,23 +128,22 @@ const Settings = () => {
     }
 
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/user/change-password', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Authorization': `Bearer ${userToken}`,
-      //     'Content-Type': 'application/json'
-      //   },
-      //   body: JSON.stringify({
-      //     currentPassword: currentPassword,
-      //     newPassword: newPassword
-      //   })
-      // });
+      const response = await fetch('/api/user/change-password', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${userToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          currentPassword: currentPassword,
+          newPassword: newPassword
+        })
+      });
       
-      // if (!response.ok) {
-      //   const errorData = await response.json();
-      //   throw new Error(errorData.message || 'Failed to change password');
-      // }
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to change password');
+      }
       
       toast.success("Password changed successfully");
       setCurrentPassword("");
@@ -150,18 +158,18 @@ const Settings = () => {
   // API Integration: Unarchive chat
   const handleUnarchiveChat = async (chatId: string, chatName: string) => {
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch(`/api/chats/${chatId}/unarchive`, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Authorization': `Bearer ${userToken}`,
-      //     'Content-Type': 'application/json'
-      //   }
-      // });
+      const response = await fetch(`/api/chats/${chatId}/unarchive`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${userToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
       
-      // if (!response.ok) {
-      //   throw new Error('Failed to unarchive chat');
-      // }
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to unarchive chat');
+      }
       
       // Remove from archived chats list
       setGlobalArchivedChats(prev => prev.filter(chat => chat.id !== chatId));
@@ -175,18 +183,18 @@ const Settings = () => {
   // API Integration: Delete archived chat
   const handleDeleteArchivedChat = async (chatId: string, chatName: string) => {
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch(`/api/chats/${chatId}`, {
-      //   method: 'DELETE',
-      //   headers: {
-      //     'Authorization': `Bearer ${userToken}`,
-      //     'Content-Type': 'application/json'
-      //   }
-      // });
+      const response = await fetch(`/api/chats/${chatId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${userToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
       
-      // if (!response.ok) {
-      //   throw new Error('Failed to delete chat');
-      // }
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete chat');
+      }
       
       // Remove from archived chats list
       setGlobalArchivedChats(prev => prev.filter(chat => chat.id !== chatId));
@@ -365,7 +373,7 @@ const Settings = () => {
                       <p className="text-gray-500">Loading archived chats...</p>
                     </div>
                   ) : (
-                    <ScrollArea className="h-96 w-full">
+                    <div className="h-96 overflow-y-auto">
                       <div className="space-y-3 pr-4">
                         {globalArchivedChats.map((chat) => (
                           <div key={chat.id} className="flex items-center justify-between p-4 border rounded-lg">
@@ -394,7 +402,7 @@ const Settings = () => {
                           </div>
                         ))}
                       </div>
-                    </ScrollArea>
+                    </div>
                   )}
 
                   {globalArchivedChats.length === 0 && !isLoadingArchived && (

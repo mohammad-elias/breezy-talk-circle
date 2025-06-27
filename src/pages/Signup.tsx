@@ -25,14 +25,21 @@ const Signup = () => {
       return;
     }
 
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+
     setIsLoading(true);
     
     try {
+      // API Integration: Register with JWT authentication
       const success = await signup(name, email, password);
       if (success) {
-        toast.success("Account created successfully!");
         navigate("/chats");
       }
+    } catch (error) {
+      console.error('Signup submission error:', error);
     } finally {
       setIsLoading(false);
     }

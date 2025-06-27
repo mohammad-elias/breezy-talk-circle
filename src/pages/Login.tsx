@@ -20,10 +20,13 @@ const Login = () => {
     setIsLoading(true);
     
     try {
+      // API Integration: Login with JWT authentication
       const success = await login(email, password);
       if (success) {
         navigate("/chats");
       }
+    } catch (error) {
+      console.error('Login submission error:', error);
     } finally {
       setIsLoading(false);
     }
