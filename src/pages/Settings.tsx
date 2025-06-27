@@ -1,3 +1,4 @@
+
 import { useAuth } from "@/context/AuthContext";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState } from "react";
 import { toast } from "@/components/ui/sonner";
 import { User, Settings as SettingsIcon, Archive, Trash2 } from "lucide-react";
@@ -222,34 +224,36 @@ const Settings = () => {
                     </span>
                   </div>
 
-                  <div className="space-y-3">
-                    {globalArchivedChats.map((chat) => (
-                      <div key={chat.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex-1">
-                          <h4 className="font-medium">{chat.name}</h4>
-                          <p className="text-sm text-gray-500">{chat.lastMessage}</p>
-                          <p className="text-xs text-gray-400 mt-1">Archived on {chat.date}</p>
+                  <ScrollArea className="h-96 w-full">
+                    <div className="space-y-3 pr-4">
+                      {globalArchivedChats.map((chat) => (
+                        <div key={chat.id} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex-1">
+                            <h4 className="font-medium">{chat.name}</h4>
+                            <p className="text-sm text-gray-500">{chat.lastMessage}</p>
+                            <p className="text-xs text-gray-400 mt-1">Archived on {chat.date}</p>
+                          </div>
+                          <div className="flex space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleUnarchiveChat(chat.id, chat.name)}
+                            >
+                              Unarchive
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDeleteArchivedChat(chat.id, chat.name)}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 size={14} />
+                            </Button>
+                          </div>
                         </div>
-                        <div className="flex space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleUnarchiveChat(chat.id, chat.name)}
-                          >
-                            Unarchive
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDeleteArchivedChat(chat.id, chat.name)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash2 size={14} />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
 
                   {globalArchivedChats.length === 0 && (
                     <div className="text-center py-12 text-gray-500">
