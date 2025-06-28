@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { users as allUsers } from "@/data/sampleData";
 import { useAuth } from "@/context/AuthContext";
 import { useConnections } from "@/hooks/useConnections";
@@ -10,10 +10,20 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { UserPlus, UserCheck, UserX, Clock, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "@/components/ui/sonner";
+
+interface User {
+  id: string;
+  name: string;
+  avatar: string;
+  isOnline: boolean;
+}
 
 export function UserSearch() {
   const [searchQuery, setSearchQuery] = useState("");
-  const { currentUser } = useAuth();
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const { currentUser, userToken } = useAuth();
   const navigate = useNavigate();
   
   const {
@@ -25,14 +35,55 @@ export function UserSearch() {
     cancelConnectionRequest,
   } = useConnections(currentUser?.id || "0");
 
-  // Filter users based on search query (exclude current user)
-  const filteredUsers = allUsers.filter(user => 
-    user.id !== currentUser?.id &&
-    user.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // API Integration: Search users
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      searchUsers(searchQuery);
+    } else {
+      setUsers([]);
+    }
+  }, [searchQuery]);
+
+  const searchUsers = async (query: string) => {
+    if (!userToken) {
+      toast.error("Authentication required");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/users/search?q=${encodeURIComponent(query)}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${userToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to search users');
+      }
+
+      const data = await response.json();
+      setUsers(data.users || []);
+    } catch (error) {
+      console.error('Error searching users:', error);
+      toast.error("Failed to search users");
+      
+      // Fallback for demo - filter local users
+      const filteredUsers = allUsers.filter(user => 
+        user.id !== currentUser?.id &&
+        user.name.toLowerCase().includes(query.toLowerCase())
+      );
+      setUsers(filteredUsers);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Sort users: online first, then alphabetically
-  const sortedUsers = [...filteredUsers].sort((a, b) => {
+  const sortedUsers = [...users].sort((a, b) => {
     if (a.isOnline !== b.isOnline) {
       return a.isOnline ? -1 : 1;
     }
@@ -143,7 +194,13 @@ export function UserSearch() {
       </div>
 
       <div className="space-y-3">
-        {sortedUsers.length === 0 ? (
+        {isLoading ? (
+          <Card>
+            <CardContent className="p-6 text-center text-gray-500">
+              Searching users...
+            </CardContent>
+          </Card>
+        ) : sortedUsers.length === 0 ? (
           <Card>
             <CardContent className="p-6 text-center text-gray-500">
               {searchQuery ? "No users found matching your search." : "Start typing to search for users."}

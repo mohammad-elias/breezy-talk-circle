@@ -1,4 +1,5 @@
 
+import { useState, useEffect } from "react";
 import { users as allUsers } from "@/data/sampleData";
 import { useAuth } from "@/context/AuthContext";
 import { useConnections } from "@/hooks/useConnections";
@@ -7,9 +8,19 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { UserCheck, UserX, Inbox } from "lucide-react";
+import { toast } from "@/components/ui/sonner";
+
+interface User {
+  id: string;
+  name: string;
+  avatar: string;
+  isOnline: boolean;
+}
 
 export function ConnectionRequests() {
-  const { currentUser } = useAuth();
+  const { currentUser, userToken } = useAuth();
+  const [requestUsers, setRequestUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const {
     getPendingRequests,
     acceptConnectionRequest,
@@ -18,14 +29,81 @@ export function ConnectionRequests() {
 
   const pendingRequests = getPendingRequests();
 
+  // API Integration: Load user details for pending requests
+  useEffect(() => {
+    if (pendingRequests.length > 0 && userToken) {
+      loadRequestUsers();
+    }
+  }, [pendingRequests, userToken]);
+
+  const loadRequestUsers = async () => {
+    if (!userToken) return;
+    
+    const userIds = pendingRequests.map(req => req.fromUserId);
+    if (userIds.length === 0) return;
+
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/users/batch', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${userToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userIds: userIds
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to load user details');
+      }
+
+      const data = await response.json();
+      setRequestUsers(data.users || []);
+    } catch (error) {
+      console.error('Error loading user details:', error);
+      toast.error("Failed to load user details");
+      
+      // Fallback: use local user data
+      const fallbackUsers = pendingRequests.map(request => {
+        const user = allUsers.find(u => u.id === request.fromUserId);
+        return user;
+      }).filter(Boolean) as User[];
+      setRequestUsers(fallbackUsers);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Get user details for each pending request
   const requestsWithUserData = pendingRequests.map(request => {
-    const user = allUsers.find(u => u.id === request.fromUserId);
+    const user = requestUsers.find(u => u.id === request.fromUserId) || 
+                allUsers.find(u => u.id === request.fromUserId);
     return {
       ...request,
       user,
     };
-  }).filter(request => request.user); // Filter out any requests without user data
+  }).filter(request => request.user);
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Inbox size={20} />
+            Connection Requests
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8 text-gray-500">
+            <p>Loading connection requests...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (requestsWithUserData.length === 0) {
     return (

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { UserSearch } from "@/components/UserSearch";
 import { ConnectionRequests } from "@/components/ConnectionRequests";
@@ -10,13 +10,50 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/AuthContext";
 import { useConnections } from "@/hooks/useConnections";
 import { Search, Inbox, Users } from "lucide-react";
+import { toast } from "@/components/ui/sonner";
 
 const UsersList = () => {
-  const { currentUser } = useAuth();
-  const { getPendingRequests, getConnectedUsers } = useConnections(currentUser?.id || "0");
+  const { currentUser, userToken } = useAuth();
+  const { getPendingRequests, getConnectedUsers, loadConnections } = useConnections(currentUser?.id || "0");
+  const [isLoading, setIsLoading] = useState(false);
   
   const pendingRequestsCount = getPendingRequests().length;
   const connectedUsersCount = getConnectedUsers().length;
+
+  // API Integration: Load connections on component mount
+  useEffect(() => {
+    if (userToken && currentUser?.id) {
+      loadUserConnections();
+    }
+  }, [userToken, currentUser?.id]);
+
+  const loadUserConnections = async () => {
+    if (!userToken || !currentUser?.id) return;
+    
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/connections', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${userToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to load connections');
+      }
+
+      const data = await response.json();
+      loadConnections(data.connections || []);
+    } catch (error) {
+      console.error('Error loading connections:', error);
+      toast.error("Failed to load connections");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <DashboardLayout>

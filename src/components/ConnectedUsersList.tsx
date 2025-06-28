@@ -1,4 +1,5 @@
 
+import { useState, useEffect } from "react";
 import { users as allUsers } from "@/data/sampleData";
 import { useAuth } from "@/context/AuthContext";
 import { useConnections } from "@/hooks/useConnections";
@@ -8,25 +9,110 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MessageCircle, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "@/components/ui/sonner";
+
+interface User {
+  id: string;
+  name: string;
+  avatar: string;
+  isOnline: boolean;
+}
 
 export function ConnectedUsersList() {
-  const { currentUser } = useAuth();
+  const { currentUser, userToken } = useAuth();
   const { getConnectedUsers } = useConnections(currentUser?.id || "0");
+  const [connectedUsers, setConnectedUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const connectedConnections = getConnectedUsers();
+
+  // API Integration: Load user details for connected users
+  useEffect(() => {
+    if (connectedConnections.length > 0 && userToken) {
+      loadConnectedUsers();
+    }
+  }, [connectedConnections, userToken]);
+
+  const loadConnectedUsers = async () => {
+    if (!userToken) return;
+    
+    const userIds = connectedConnections.map(connection => 
+      connection.fromUserId === currentUser?.id 
+        ? connection.toUserId 
+        : connection.fromUserId
+    );
+    
+    if (userIds.length === 0) return;
+
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/users/batch', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${userToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userIds: userIds
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to load connected users');
+      }
+
+      const data = await response.json();
+      setConnectedUsers(data.users || []);
+    } catch (error) {
+      console.error('Error loading connected users:', error);
+      toast.error("Failed to load connected users");
+      
+      // Fallback: use local user data
+      const fallbackUsers = connectedConnections.map(connection => {
+        const userId = connection.fromUserId === currentUser?.id 
+          ? connection.toUserId 
+          : connection.fromUserId;
+        const user = allUsers.find(u => u.id === userId);
+        return user;
+      }).filter(Boolean) as User[];
+      setConnectedUsers(fallbackUsers);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Get user details for each connected user
   const connectedUsersWithData = connectedConnections.map(connection => {
     const userId = connection.fromUserId === currentUser?.id 
       ? connection.toUserId 
       : connection.fromUserId;
-    const user = allUsers.find(u => u.id === userId);
+    const user = connectedUsers.find(u => u.id === userId) || 
+                allUsers.find(u => u.id === userId);
     return {
       ...connection,
       user,
     };
-  }).filter(connection => connection.user); // Filter out any connections without user data
+  }).filter(connection => connection.user);
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users size={20} />
+            Connected Users
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8 text-gray-500">
+            <p>Loading connected users...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (connectedUsersWithData.length === 0) {
     return (
