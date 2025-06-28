@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { users as allUsers } from "@/data/sampleData";
 import { useAuth } from "@/context/AuthContext";
@@ -7,7 +6,7 @@ import { UserAvatar } from "@/components/UserAvatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { UserCheck, UserX, Inbox } from "lucide-react";
+import { UserCheck, UserX, Inbox, AlertCircle } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 
 interface User {
@@ -21,6 +20,7 @@ export function ConnectionRequests() {
   const { currentUser, userToken } = useAuth();
   const [requestUsers, setRequestUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
   const {
     getPendingRequests,
     acceptConnectionRequest,
@@ -43,7 +43,9 @@ export function ConnectionRequests() {
     if (userIds.length === 0) return;
 
     setIsLoading(true);
+    setApiError(null);
     try {
+      console.log('Loading request users:', userIds);
       const response = await fetch('/api/users/batch', {
         method: 'POST',
         headers: {
@@ -57,14 +59,20 @@ export function ConnectionRequests() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to load user details');
+        const errorMessage = errorData.message || `HTTP ${response.status}: Failed to load user details`;
+        console.error('API Error:', errorMessage);
+        setApiError(errorMessage);
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
+      console.log('Loaded request users:', data);
       setRequestUsers(data.users || []);
+      setApiError(null);
     } catch (error) {
       console.error('Error loading user details:', error);
-      toast.error("Failed to load user details");
+      const errorMessage = error instanceof Error ? error.message : "Failed to load user details";
+      setApiError(errorMessage);
       
       // Fallback: use local user data
       const fallbackUsers = pendingRequests.map(request => {
@@ -72,6 +80,7 @@ export function ConnectionRequests() {
         return user;
       }).filter(Boolean) as User[];
       setRequestUsers(fallbackUsers);
+      toast.error(`API Error: ${errorMessage}. Using local data.`);
     } finally {
       setIsLoading(false);
     }
@@ -138,6 +147,25 @@ export function ConnectionRequests() {
         </CardTitle>
       </CardHeader>
       <CardContent>
+        {/* API Error Display */}
+        {apiError && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+            <div className="flex items-center gap-2 text-red-700">
+              <AlertCircle size={16} />
+              <p className="text-sm font-medium">API Error:</p>
+            </div>
+            <p className="text-sm text-red-600 mt-1">{apiError}</p>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="mt-2 text-red-600 border-red-200"
+              onClick={loadRequestUsers}
+            >
+              Retry
+            </Button>
+          </div>
+        )}
+
         <div className="space-y-3">
           {requestsWithUserData.map((request) => (
             <div

@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { UserPlus, UserCheck, UserX, Clock, MessageCircle } from "lucide-react";
+import { UserPlus, UserCheck, UserX, Clock, MessageCircle, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/sonner";
 
@@ -23,6 +23,7 @@ export function UserSearch() {
   const [searchQuery, setSearchQuery] = useState("");
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
   const { currentUser, userToken } = useAuth();
   const navigate = useNavigate();
   
@@ -41,17 +42,20 @@ export function UserSearch() {
       searchUsers(searchQuery);
     } else {
       setUsers([]);
+      setApiError(null);
     }
   }, [searchQuery]);
 
   const searchUsers = async (query: string) => {
     if (!userToken) {
-      toast.error("Authentication required");
+      setApiError("Authentication required");
       return;
     }
 
     setIsLoading(true);
+    setApiError(null);
     try {
+      console.log(`Searching users with query: ${query}`);
       const response = await fetch(`/api/users/search?q=${encodeURIComponent(query)}`, {
         method: 'GET',
         headers: {
@@ -62,14 +66,20 @@ export function UserSearch() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to search users');
+        const errorMessage = errorData.message || `HTTP ${response.status}: Failed to search users`;
+        console.error('API Error:', errorMessage);
+        setApiError(errorMessage);
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
+      console.log('Search results:', data);
       setUsers(data.users || []);
+      setApiError(null);
     } catch (error) {
       console.error('Error searching users:', error);
-      toast.error("Failed to search users");
+      const errorMessage = error instanceof Error ? error.message : "Failed to search users";
+      setApiError(errorMessage);
       
       // Fallback for demo - filter local users
       const filteredUsers = allUsers.filter(user => 
@@ -77,6 +87,7 @@ export function UserSearch() {
         user.name.toLowerCase().includes(query.toLowerCase())
       );
       setUsers(filteredUsers);
+      toast.error(`API Error: ${errorMessage}. Using local data.`);
     } finally {
       setIsLoading(false);
     }
@@ -192,6 +203,27 @@ export function UserSearch() {
           className="w-full"
         />
       </div>
+
+      {/* API Error Display */}
+      {apiError && (
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 text-red-700">
+              <AlertCircle size={16} />
+              <p className="text-sm font-medium">API Error:</p>
+            </div>
+            <p className="text-sm text-red-600 mt-1">{apiError}</p>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="mt-2 text-red-600 border-red-200"
+              onClick={() => searchQuery && searchUsers(searchQuery)}
+            >
+              Retry
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="space-y-3">
         {isLoading ? (

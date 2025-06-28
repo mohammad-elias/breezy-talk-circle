@@ -8,12 +8,17 @@ import { MessageInput } from "./MessageInput";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { toast } from "@/components/ui/sonner";
 import { TestCredentials } from "./TestCredentials";
+import { Card, CardContent } from "@/components/ui/card";
+import { AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function ChatLayout() {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [users, setUsers] = useState<User[]>(initialUsers);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  const [messagesApiError, setMessagesApiError] = useState<string | null>(null);
+  const [usersApiError, setUsersApiError] = useState<string | null>(null);
   const { currentUser, logout, userToken } = useAuth();
   
   // Set up WebSocket connection and handlers
@@ -22,7 +27,7 @@ export function ChatLayout() {
     setMessages(prev => [...prev, newMessage]);
   });
 
-  // API Integration: Load messages on component mount
+  // API Integration: Load messages and users on component mount
   useEffect(() => {
     if (userToken) {
       loadMessages();
@@ -35,7 +40,9 @@ export function ChatLayout() {
     if (!userToken) return;
     
     setIsLoadingMessages(true);
+    setMessagesApiError(null);
     try {
+      console.log('Loading messages...');
       const response = await fetch('/api/messages', {
         method: 'GET',
         headers: {
@@ -46,14 +53,21 @@ export function ChatLayout() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to load messages');
+        const errorMessage = errorData.message || `HTTP ${response.status}: Failed to load messages`;
+        console.error('Messages API Error:', errorMessage);
+        setMessagesApiError(errorMessage);
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
+      console.log('Loaded messages:', data);
       setMessages(data.messages || []);
+      setMessagesApiError(null);
     } catch (error) {
       console.error('Error loading messages:', error);
-      toast.error("Failed to load messages");
+      const errorMessage = error instanceof Error ? error.message : "Failed to load messages";
+      setMessagesApiError(errorMessage);
+      toast.error(`Messages API Error: ${errorMessage}. Using sample data.`);
       // Keep using sample data as fallback
       setMessages(initialMessages);
     } finally {
@@ -66,7 +80,9 @@ export function ChatLayout() {
     if (!userToken) return;
     
     setIsLoadingUsers(true);
+    setUsersApiError(null);
     try {
+      console.log('Loading users...');
       const response = await fetch('/api/users', {
         method: 'GET',
         headers: {
@@ -77,14 +93,21 @@ export function ChatLayout() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to load users');
+        const errorMessage = errorData.message || `HTTP ${response.status}: Failed to load users`;
+        console.error('Users API Error:', errorMessage);
+        setUsersApiError(errorMessage);
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
+      console.log('Loaded users:', data);
       setUsers(data.users || []);
+      setUsersApiError(null);
     } catch (error) {
       console.error('Error loading users:', error);
-      toast.error("Failed to load users");
+      const errorMessage = error instanceof Error ? error.message : "Failed to load users";
+      setUsersApiError(errorMessage);
+      toast.error(`Users API Error: ${errorMessage}. Using sample data.`);
       // Keep using sample data as fallback
       setUsers(initialUsers);
     } finally {
@@ -117,6 +140,7 @@ export function ChatLayout() {
     };
     
     try {
+      console.log('Sending message:', text);
       // Send message to API
       const response = await fetch('/api/messages', {
         method: 'POST',
@@ -132,21 +156,25 @@ export function ChatLayout() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to send message');
+        const errorMessage = errorData.message || `HTTP ${response.status}: Failed to send message`;
+        console.error('Send Message API Error:', errorMessage);
+        throw new Error(errorMessage);
       }
 
       const savedMessage = await response.json();
+      console.log('Message sent successfully:', savedMessage);
       
       // Send message via WebSocket for real-time delivery
       sendWebSocketMessage(savedMessage);
-      toast("Message sent successfully!");
+      toast.success("Message sent successfully!");
     } catch (error) {
       console.error('Error sending message:', error);
-      toast.error("Failed to send message");
+      const errorMessage = error instanceof Error ? error.message : "Failed to send message";
+      toast.error(`Send Message API Error: ${errorMessage}. Sending locally.`);
       
       // Fallback: add message locally and send via WebSocket
       sendWebSocketMessage(newMessage);
-      toast("Message sent (offline mode)!");
+      toast.success("Message sent (offline mode)!");
     }
   };
 
@@ -162,6 +190,46 @@ export function ChatLayout() {
       />
       
       <div className="flex-1 flex flex-col overflow-hidden">
+        {/* API Error Display */}
+        {(messagesApiError || usersApiError) && (
+          <div className="p-2 bg-red-50 border-b border-red-200">
+            <Card className="border-red-200">
+              <CardContent className="p-3">
+                <div className="flex items-center gap-2 text-red-700">
+                  <AlertCircle size={16} />
+                  <p className="text-sm font-medium">Chat API Errors:</p>
+                </div>
+                {messagesApiError && (
+                  <div className="mt-2">
+                    <p className="text-xs text-red-600">Messages: {messagesApiError}</p>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="mt-1 text-red-600 border-red-200"
+                      onClick={loadMessages}
+                    >
+                      Retry Messages
+                    </Button>
+                  </div>
+                )}
+                {usersApiError && (
+                  <div className="mt-2">
+                    <p className="text-xs text-red-600">Users: {usersApiError}</p>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="mt-1 text-red-600 border-red-200"
+                      onClick={loadUsers}
+                    >
+                      Retry Users
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         <ChatHeader 
           activeUsers={[currentUser, ...users.filter(u => u.isOnline)]} 
           onLogout={logout} 

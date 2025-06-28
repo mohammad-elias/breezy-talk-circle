@@ -6,11 +6,13 @@ import { useAuth } from "@/context/AuthContext";
 
 export function useConnections(currentUserId: string) {
   const [connections, setConnections] = useState<Connection[]>(initialConnections);
+  const [apiError, setApiError] = useState<string | null>(null);
   const { userToken } = useAuth();
 
   // API Integration: Load connections from server
   const loadConnections = useCallback((serverConnections: Connection[]) => {
     setConnections(serverConnections);
+    setApiError(null);
   }, []);
 
   // Get connection status between two users
@@ -35,11 +37,15 @@ export function useConnections(currentUserId: string) {
   // API Integration: Send connection request
   const sendConnectionRequest = useCallback(async (userId: string) => {
     if (!userToken) {
-      toast.error("Authentication required");
+      const errorMessage = "Authentication required";
+      setApiError(errorMessage);
+      toast.error(errorMessage);
       return;
     }
 
+    setApiError(null);
     try {
+      console.log('Sending connection request to:', userId);
       const response = await fetch('/api/connections/request', {
         method: 'POST',
         headers: {
@@ -53,15 +59,21 @@ export function useConnections(currentUserId: string) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to send connection request');
+        const errorMessage = errorData.message || `HTTP ${response.status}: Failed to send connection request`;
+        console.error('Send Connection Request API Error:', errorMessage);
+        setApiError(errorMessage);
+        throw new Error(errorMessage);
       }
 
       const newConnection = await response.json();
+      console.log('Connection request sent:', newConnection);
       setConnections(prev => [...prev, newConnection]);
       toast.success("Connection request sent!");
     } catch (error) {
       console.error('Error sending connection request:', error);
-      toast.error("Failed to send connection request");
+      const errorMessage = error instanceof Error ? error.message : "Failed to send connection request";
+      setApiError(errorMessage);
+      toast.error(`API Error: ${errorMessage}. Creating local request.`);
       
       // Fallback for demo
       const newConnection: Connection = {
@@ -79,11 +91,15 @@ export function useConnections(currentUserId: string) {
   // API Integration: Accept connection request
   const acceptConnectionRequest = useCallback(async (userId: string) => {
     if (!userToken) {
-      toast.error("Authentication required");
+      const errorMessage = "Authentication required";
+      setApiError(errorMessage);
+      toast.error(errorMessage);
       return;
     }
 
+    setApiError(null);
     try {
+      console.log('Accepting connection request from:', userId);
       const response = await fetch('/api/connections/accept', {
         method: 'POST',
         headers: {
@@ -97,9 +113,13 @@ export function useConnections(currentUserId: string) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to accept connection request');
+        const errorMessage = errorData.message || `HTTP ${response.status}: Failed to accept connection request`;
+        console.error('Accept Connection API Error:', errorMessage);
+        setApiError(errorMessage);
+        throw new Error(errorMessage);
       }
 
+      console.log('Connection request accepted');
       setConnections(prev =>
         prev.map(conn =>
           (conn.fromUserId === userId && conn.toUserId === currentUserId)
@@ -110,18 +130,24 @@ export function useConnections(currentUserId: string) {
       toast.success("Connection request accepted!");
     } catch (error) {
       console.error('Error accepting connection request:', error);
-      toast.error("Failed to accept connection request");
+      const errorMessage = error instanceof Error ? error.message : "Failed to accept connection request";
+      setApiError(errorMessage);
+      toast.error(`API Error: ${errorMessage}`);
     }
   }, [currentUserId, userToken]);
 
   // API Integration: Decline connection request
   const declineConnectionRequest = useCallback(async (userId: string) => {
     if (!userToken) {
-      toast.error("Authentication required");
+      const errorMessage = "Authentication required";
+      setApiError(errorMessage);
+      toast.error(errorMessage);
       return;
     }
 
+    setApiError(null);
     try {
+      console.log('Declining connection request from:', userId);
       const response = await fetch('/api/connections/decline', {
         method: 'POST',
         headers: {
@@ -135,9 +161,13 @@ export function useConnections(currentUserId: string) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to decline connection request');
+        const errorMessage = errorData.message || `HTTP ${response.status}: Failed to decline connection request`;
+        console.error('Decline Connection API Error:', errorMessage);
+        setApiError(errorMessage);
+        throw new Error(errorMessage);
       }
 
+      console.log('Connection request declined');
       setConnections(prev =>
         prev.map(conn =>
           (conn.fromUserId === userId && conn.toUserId === currentUserId)
@@ -148,18 +178,24 @@ export function useConnections(currentUserId: string) {
       toast("Connection request declined");
     } catch (error) {
       console.error('Error declining connection request:', error);
-      toast.error("Failed to decline connection request");
+      const errorMessage = error instanceof Error ? error.message : "Failed to decline connection request";
+      setApiError(errorMessage);
+      toast.error(`API Error: ${errorMessage}`);
     }
   }, [currentUserId, userToken]);
 
   // API Integration: Cancel connection request
   const cancelConnectionRequest = useCallback(async (userId: string) => {
     if (!userToken) {
-      toast.error("Authentication required");
+      const errorMessage = "Authentication required";
+      setApiError(errorMessage);
+      toast.error(errorMessage);
       return;
     }
 
+    setApiError(null);
     try {
+      console.log('Cancelling connection request to:', userId);
       const response = await fetch('/api/connections/cancel', {
         method: 'DELETE',
         headers: {
@@ -173,9 +209,13 @@ export function useConnections(currentUserId: string) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to cancel connection request');
+        const errorMessage = errorData.message || `HTTP ${response.status}: Failed to cancel connection request`;
+        console.error('Cancel Connection API Error:', errorMessage);
+        setApiError(errorMessage);
+        throw new Error(errorMessage);
       }
 
+      console.log('Connection request cancelled');
       setConnections(prev =>
         prev.filter(conn =>
           !(conn.fromUserId === currentUserId && conn.toUserId === userId)
@@ -184,7 +224,9 @@ export function useConnections(currentUserId: string) {
       toast("Connection request cancelled");
     } catch (error) {
       console.error('Error cancelling connection request:', error);
-      toast.error("Failed to cancel connection request");
+      const errorMessage = error instanceof Error ? error.message : "Failed to cancel connection request";
+      setApiError(errorMessage);
+      toast.error(`API Error: ${errorMessage}`);
     }
   }, [currentUserId, userToken]);
 
@@ -206,6 +248,7 @@ export function useConnections(currentUserId: string) {
 
   return {
     connections,
+    apiError,
     loadConnections,
     getConnectionStatus,
     isRequestSentByCurrentUser,

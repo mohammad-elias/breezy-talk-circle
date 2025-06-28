@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { users as allUsers } from "@/data/sampleData";
 import { useAuth } from "@/context/AuthContext";
@@ -7,7 +6,7 @@ import { UserAvatar } from "@/components/UserAvatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, Users } from "lucide-react";
+import { MessageCircle, Users, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/sonner";
 
@@ -23,6 +22,7 @@ export function ConnectedUsersList() {
   const { getConnectedUsers } = useConnections(currentUser?.id || "0");
   const [connectedUsers, setConnectedUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const connectedConnections = getConnectedUsers();
@@ -46,7 +46,9 @@ export function ConnectedUsersList() {
     if (userIds.length === 0) return;
 
     setIsLoading(true);
+    setApiError(null);
     try {
+      console.log('Loading connected users:', userIds);
       const response = await fetch('/api/users/batch', {
         method: 'POST',
         headers: {
@@ -60,14 +62,20 @@ export function ConnectedUsersList() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to load connected users');
+        const errorMessage = errorData.message || `HTTP ${response.status}: Failed to load connected users`;
+        console.error('API Error:', errorMessage);
+        setApiError(errorMessage);
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
+      console.log('Loaded connected users:', data);
       setConnectedUsers(data.users || []);
+      setApiError(null);    
     } catch (error) {
       console.error('Error loading connected users:', error);
-      toast.error("Failed to load connected users");
+      const errorMessage = error instanceof Error ? error.message : "Failed to load connected users";
+      setApiError(errorMessage);
       
       // Fallback: use local user data
       const fallbackUsers = connectedConnections.map(connection => {
@@ -78,6 +86,7 @@ export function ConnectedUsersList() {
         return user;
       }).filter(Boolean) as User[];
       setConnectedUsers(fallbackUsers);
+      toast.error(`API Error: ${errorMessage}. Using local data.`);
     } finally {
       setIsLoading(false);
     }
@@ -148,6 +157,25 @@ export function ConnectedUsersList() {
         </CardTitle>
       </CardHeader>
       <CardContent>
+        {/* API Error Display */}
+        {apiError && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+            <div className="flex items-center gap-2 text-red-700">
+              <AlertCircle size={16} />
+              <p className="text-sm font-medium">API Error:</p>
+            </div>
+            <p className="text-sm text-red-600 mt-1">{apiError}</p>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="mt-2 text-red-600 border-red-200"
+              onClick={loadConnectedUsers}
+            >
+              Retry
+            </Button>
+          </div>
+        )}
+
         <div className="space-y-3">
           {connectedUsersWithData.map((connection) => (
             <div
