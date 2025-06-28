@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { User } from "@/data/sampleData";
@@ -15,9 +14,10 @@ interface ChatSidebarProps {
   users: User[];
   currentUser: User;
   onLogout: () => void;
+  isLoading?: boolean;
 }
 
-export function ChatSidebar({ users, currentUser, onLogout }: ChatSidebarProps) {
+export function ChatSidebar({ users, currentUser, onLogout, isLoading = false }: ChatSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { getConnectionStatus, getPendingRequests } = useConnections(currentUser.id);
@@ -137,49 +137,55 @@ export function ChatSidebar({ users, currentUser, onLogout }: ChatSidebarProps) 
             </h3>
           )}
           
-          <div className="mt-2 space-y-1">
-            {sortedUsers.map((user) => {
-              const connectionStatus = getConnectionStatus(user.id);
-              const isConnected = connectionStatus === 'accepted';
-              
-              return (
-                <div 
-                  key={user.id}
-                  className={cn(
-                    "flex items-center gap-3 p-2 rounded-md hover:bg-white cursor-pointer transition-colors duration-200",
-                    user.isOnline && "bg-gray-50",
-                    isConnected && "border border-green-200",
-                    isCollapsed && "justify-center"
-                  )}
-                >
-                  <UserAvatar 
-                    src={user.avatar}
-                    alt={user.name}
-                    isOnline={user.isOnline}
-                    className={cn(isCollapsed && "w-8 h-8")}
-                  />
-                  {!isCollapsed && (
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium truncate">{user.name}</p>
-                        {isConnected && (
-                          <Badge variant="secondary" className="text-xs bg-green-100 text-green-700">
-                            Connected
-                          </Badge>
-                        )}
+          {isLoading ? (
+            <div className="flex justify-center py-4">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
+            </div>
+          ) : (
+            <div className="mt-2 space-y-1">
+              {sortedUsers.map((user) => {
+                const connectionStatus = getConnectionStatus(user.id);
+                const isConnected = connectionStatus === 'accepted';
+                
+                return (
+                  <div 
+                    key={user.id}
+                    className={cn(
+                      "flex items-center gap-3 p-2 rounded-md hover:bg-white cursor-pointer transition-colors duration-200",
+                      user.isOnline && "bg-gray-50",
+                      isConnected && "border border-green-200",
+                      isCollapsed && "justify-center"
+                    )}
+                  >
+                    <UserAvatar 
+                      src={user.avatar}
+                      alt={user.name}
+                      isOnline={user.isOnline}
+                      className={cn(isCollapsed && "w-8 h-8")}
+                    />
+                    {!isCollapsed && (
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium truncate">{user.name}</p>
+                          {isConnected && (
+                            <Badge variant="secondary" className="text-xs bg-green-100 text-green-700">
+                              Connected
+                            </Badge>
+                          )}
+                        </div>
+                        <p className={cn(
+                          "text-xs",
+                          user.isOnline ? "text-green-500" : "text-gray-500"
+                        )}>
+                          {user.isOnline ? "Online" : "Offline"}
+                        </p>
                       </div>
-                      <p className={cn(
-                        "text-xs",
-                        user.isOnline ? "text-green-500" : "text-gray-500"
-                      )}>
-                        {user.isOnline ? "Online" : "Offline"}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </ScrollArea>
 

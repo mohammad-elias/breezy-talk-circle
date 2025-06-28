@@ -5,9 +5,10 @@ import { ChatMessage } from "./ChatMessage";
 
 interface MessageListProps {
   messages: Message[];
+  isLoading?: boolean;
 }
 
-export function MessageList({ messages }: MessageListProps) {
+export function MessageList({ messages, isLoading = false }: MessageListProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   // Auto-scroll to the latest message
@@ -19,6 +20,15 @@ export function MessageList({ messages }: MessageListProps) {
     if (userId === currentUser.id) return currentUser;
     return allUsers.find(user => user.id === userId) || currentUser;
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col p-4 overflow-y-auto flex-1 justify-center items-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        <p className="mt-2 text-gray-500">Loading messages...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col p-4 overflow-y-auto flex-1">
