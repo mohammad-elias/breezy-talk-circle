@@ -36,15 +36,70 @@ export function UserSearch() {
     cancelConnectionRequest,
   } = useConnections(currentUser?.id || "0");
 
-  // API Integration: Search users
+  // Load all users on component mount
+  useEffect(() => {
+    if (userToken) {
+      loadAllUsers();
+    }
+  }, [userToken]);
+
+  // Search users when query changes
   useEffect(() => {
     if (searchQuery.trim()) {
       searchUsers(searchQuery);
     } else {
-      setUsers([]);
-      setApiError(null);
+      // If no search query, show all users
+      if (userToken) {
+        loadAllUsers();
+      }
     }
-  }, [searchQuery]);
+  }, [searchQuery, userToken]);
+
+  const loadAllUsers = async () => {
+    if (!userToken) {
+      setApiError("Authentication required");
+      return;
+    }
+
+    setIsLoading(true);
+    setApiError(null);
+    try {
+      console.log('Loading all users...');
+      const response = await fetch('/api/users', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${userToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        const errorMessage = errorData.message || `HTTP ${response.status}: Failed to load users`;
+        console.error('API Error:', errorMessage);
+        setApiError(errorMessage);
+        throw new Error(errorMessage);
+      }
+
+      const data = await response.json();
+      console.log('Loaded all users:', data);
+      // Filter out current user
+      const filteredUsers = (data.users || []).filter((user: User) => user.id !== currentUser?.id);
+      setUsers(filteredUsers);
+      setApiError(null);
+    } catch (error) {
+      console.error('Error loading users:', error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to load users";
+      setApiError(errorMessage);
+      
+      // Fallback for demo - use local users
+      const filteredUsers = allUsers.filter(user => user.id !== currentUser?.id);
+      setUsers(filteredUsers);
+      toast.error(`API Error: ${errorMessage}. Using local data.`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const searchUsers = async (query: string) => {
     if (!userToken) {
@@ -217,7 +272,7 @@ export function UserSearch() {
               variant="outline" 
               size="sm" 
               className="mt-2 text-red-600 border-red-200"
-              onClick={() => searchQuery && searchUsers(searchQuery)}
+              onClick={() => searchQuery ? searchUsers(searchQuery) : loadAllUsers()}
             >
               Retry
             </Button>
@@ -229,13 +284,19 @@ export function UserSearch() {
         {isLoading ? (
           <Card>
             <CardContent className="p-6 text-center text-gray-500">
-              Searching users...
+              {searchQuery ? "Searching users..." : "Loading users..."}
             </CardContent>
           </Card>
-        ) : sortedUsers.length === 0 ? (
+        ) : sortedUsers.length === 0 && !searchQuery ? (
           <Card>
             <CardContent className="p-6 text-center text-gray-500">
-              {searchQuery ? "No users found matching your search." : "Start typing to search for users."}
+              No users found.
+            </CardContent>
+          </Card>
+        ) : sortedUsers.length === 0 && searchQuery ? (
+          <Card>
+            <CardContent className="p-6 text-center text-gray-500">
+              No users found matching your search.
             </CardContent>
           </Card>
         ) : (
