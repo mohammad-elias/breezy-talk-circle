@@ -38,6 +38,7 @@ export function UserSearch() {
 
   // Load all users on component mount
   useEffect(() => {
+    console.log('UserSearch component mounted, userToken:', !!userToken);
     if (userToken) {
       loadAllUsers();
     }
@@ -45,6 +46,7 @@ export function UserSearch() {
 
   // Search users when query changes
   useEffect(() => {
+    console.log('Search query changed:', searchQuery);
     if (searchQuery.trim()) {
       searchUsers(searchQuery);
     } else {
@@ -56,6 +58,7 @@ export function UserSearch() {
   }, [searchQuery, userToken]);
 
   const loadAllUsers = async () => {
+    console.log('loadAllUsers called, userToken:', !!userToken);
     if (!userToken) {
       setApiError("Authentication required");
       return;
@@ -64,8 +67,8 @@ export function UserSearch() {
     setIsLoading(true);
     setApiError(null);
     try {
-      console.log('Loading all users...');
-      const response = await fetch('/api/users', {
+      console.log('Fetching all users from API...');
+      const response = await fetch('http://127.0.0.1:8000/api/users/', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${userToken}`,
@@ -73,18 +76,41 @@ export function UserSearch() {
         }
       });
 
+      console.log('API Response status:', response.status);
+      console.log('API Response headers:', Object.fromEntries(response.headers.entries()));
+
       if (!response.ok) {
-        const errorData = await response.json();
-        const errorMessage = errorData.message || `HTTP ${response.status}: Failed to load users`;
+        let errorMessage;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorData.detail || `HTTP ${response.status}: Failed to load users`;
+        } catch {
+          errorMessage = `HTTP ${response.status}: Failed to load users`;
+        }
         console.error('API Error:', errorMessage);
         setApiError(errorMessage);
         throw new Error(errorMessage);
       }
 
       const data = await response.json();
-      console.log('Loaded all users:', data);
+      console.log('API Response data:', data);
+      
+      // Handle different possible response structures
+      let usersList = [];
+      if (Array.isArray(data)) {
+        usersList = data;
+      } else if (data.users && Array.isArray(data.users)) {
+        usersList = data.users;
+      } else if (data.results && Array.isArray(data.results)) {
+        usersList = data.results;
+      } else {
+        console.warn('Unexpected API response structure:', data);
+        usersList = [];
+      }
+      
       // Filter out current user
-      const filteredUsers = (data.users || []).filter((user: User) => user.id !== currentUser?.id);
+      const filteredUsers = usersList.filter((user: User) => user.id !== currentUser?.id);
+      console.log('Filtered users:', filteredUsers);
       setUsers(filteredUsers);
       setApiError(null);
     } catch (error) {
@@ -102,6 +128,7 @@ export function UserSearch() {
   };
 
   const searchUsers = async (query: string) => {
+    console.log('searchUsers called with query:', query);
     if (!userToken) {
       setApiError("Authentication required");
       return;
@@ -111,7 +138,7 @@ export function UserSearch() {
     setApiError(null);
     try {
       console.log(`Searching users with query: ${query}`);
-      const response = await fetch(`/api/users/search?q=${encodeURIComponent(query)}`, {
+      const response = await fetch(`http://127.0.0.1:8000/api/users/search/?q=${encodeURIComponent(query)}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${userToken}`,
@@ -119,17 +146,38 @@ export function UserSearch() {
         }
       });
 
+      console.log('Search API Response status:', response.status);
+
       if (!response.ok) {
-        const errorData = await response.json();
-        const errorMessage = errorData.message || `HTTP ${response.status}: Failed to search users`;
-        console.error('API Error:', errorMessage);
+        let errorMessage;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorData.detail || `HTTP ${response.status}: Failed to search users`;
+        } catch {
+          errorMessage = `HTTP ${response.status}: Failed to search users`;
+        }
+        console.error('Search API Error:', errorMessage);
         setApiError(errorMessage);
         throw new Error(errorMessage);
       }
 
       const data = await response.json();
       console.log('Search results:', data);
-      setUsers(data.users || []);
+      
+      // Handle different possible response structures
+      let usersList = [];
+      if (Array.isArray(data)) {
+        usersList = data;
+      } else if (data.users && Array.isArray(data.users)) {
+        usersList = data.users;
+      } else if (data.results && Array.isArray(data.results)) {
+        usersList = data.results;
+      } else {
+        console.warn('Unexpected search API response structure:', data);
+        usersList = [];
+      }
+      
+      setUsers(usersList);
       setApiError(null);
     } catch (error) {
       console.error('Error searching users:', error);
