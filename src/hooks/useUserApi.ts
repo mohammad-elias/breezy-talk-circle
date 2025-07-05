@@ -22,7 +22,8 @@ export function useUserApi() {
     setApiError(null);
     try {
       console.log('Fetching all users from API...');
-      const response = await fetch('http://127.0.0.1:8000/api/users/', {
+      // Use relative URL instead of absolute localhost URL
+      const response = await fetch('/api/users', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${userToken}`,
@@ -92,7 +93,8 @@ export function useUserApi() {
     setApiError(null);
     try {
       console.log(`Searching users with query: ${query}`);
-      const response = await fetch(`http://127.0.0.1:8000/api/users/search/?q=${encodeURIComponent(query)}`, {
+      // Use relative URL instead of absolute localhost URL
+      const response = await fetch(`/api/users/search?q=${encodeURIComponent(query)}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${userToken}`,
