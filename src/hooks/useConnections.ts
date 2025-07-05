@@ -1,8 +1,8 @@
-
 import { useState, useCallback } from "react";
 import { connections as initialConnections, Connection } from "@/data/sampleData";
 import { toast } from "@/components/ui/sonner";
 import { useAuth } from "@/context/AuthContext";
+import { API_CONFIG, apiRequest } from "@/config/api";
 
 export function useConnections(currentUserId: string) {
   const [connections, setConnections] = useState<Connection[]>(initialConnections);
@@ -46,12 +46,9 @@ export function useConnections(currentUserId: string) {
     setApiError(null);
     try {
       console.log('Sending connection request to:', userId);
-      const response = await fetch('/api/connections/request', {
+      const response = await apiRequest(API_CONFIG.ENDPOINTS.CONNECTIONS_REQUEST, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${userToken}`,
-          'Content-Type': 'application/json'
-        },
+        token: userToken,
         body: JSON.stringify({
           toUserId: userId
         })
@@ -100,12 +97,9 @@ export function useConnections(currentUserId: string) {
     setApiError(null);
     try {
       console.log('Accepting connection request from:', userId);
-      const response = await fetch('/api/connections/accept', {
+      const response = await apiRequest(API_CONFIG.ENDPOINTS.CONNECTIONS_ACCEPT, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${userToken}`,
-          'Content-Type': 'application/json'
-        },
+        token: userToken,
         body: JSON.stringify({
           fromUserId: userId
         })
@@ -148,12 +142,9 @@ export function useConnections(currentUserId: string) {
     setApiError(null);
     try {
       console.log('Declining connection request from:', userId);
-      const response = await fetch('/api/connections/decline', {
+      const response = await apiRequest(API_CONFIG.ENDPOINTS.CONNECTIONS_DECLINE, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${userToken}`,
-          'Content-Type': 'application/json'
-        },
+        token: userToken,
         body: JSON.stringify({
           fromUserId: userId
         })
@@ -196,12 +187,9 @@ export function useConnections(currentUserId: string) {
     setApiError(null);
     try {
       console.log('Cancelling connection request to:', userId);
-      const response = await fetch('/api/connections/cancel', {
+      const response = await apiRequest(API_CONFIG.ENDPOINTS.CONNECTIONS_CANCEL, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${userToken}`,
-          'Content-Type': 'application/json'
-        },
+        token: userToken,
         body: JSON.stringify({
           toUserId: userId
         })

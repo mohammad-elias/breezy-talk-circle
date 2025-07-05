@@ -4,6 +4,7 @@ import { users as allUsers } from "@/data/sampleData";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/components/ui/sonner";
 import { User } from "@/types/user";
+import { API_CONFIG, apiRequest } from "@/config/api";
 
 export function useUserApi() {
   const [users, setUsers] = useState<User[]>([]);
@@ -22,13 +23,9 @@ export function useUserApi() {
     setApiError(null);
     try {
       console.log('Fetching all users from API...');
-      // Use relative URL instead of absolute localhost URL
-      const response = await fetch('/api/users', {
+      const response = await apiRequest(API_CONFIG.ENDPOINTS.USERS, {
         method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${userToken}`,
-          'Content-Type': 'application/json'
-        }
+        token: userToken,
       });
 
       console.log('API Response status:', response.status);
@@ -93,13 +90,9 @@ export function useUserApi() {
     setApiError(null);
     try {
       console.log(`Searching users with query: ${query}`);
-      // Use relative URL instead of absolute localhost URL
-      const response = await fetch(`/api/users/search?q=${encodeURIComponent(query)}`, {
+      const response = await apiRequest(`${API_CONFIG.ENDPOINTS.USERS_SEARCH}?q=${encodeURIComponent(query)}`, {
         method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${userToken}`,
-          'Content-Type': 'application/json'
-        }
+        token: userToken,
       });
 
       console.log('Search API Response status:', response.status);
