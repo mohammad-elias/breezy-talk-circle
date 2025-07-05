@@ -1,32 +1,32 @@
 
-// Central API configuration
+// Simple API configuration using environment variables
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
 
-export const API_CONFIG = {
-  BASE_URL: API_BASE_URL,
-  ENDPOINTS: {
-    USERS: '/api/users',
-    USERS_SEARCH: '/api/users/search',
-    USERS_BATCH: '/api/users/batch',
-    CONNECTIONS: '/api/connections',
-    CONNECTIONS_REQUEST: '/api/connections/request',
-    CONNECTIONS_ACCEPT: '/api/connections/accept',
-    CONNECTIONS_DECLINE: '/api/connections/decline',
-    CONNECTIONS_CANCEL: '/api/connections/cancel',
-    MESSAGES: '/api/messages',
-    CALLS_START: '/api/calls/start',
-    CHATS_ARCHIVED: '/api/chats/archived',
-  }
+// Simple helper to build API URLs (like NEXT_PUBLIC_URL pattern)
+export const getApiUrl = (path: string): string => {
+  // Ensure path starts with /
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${API_BASE_URL}${cleanPath}`;
 };
 
-// Helper function to build full API URLs
-export const buildApiUrl = (endpoint: string): string => {
-  return `${API_CONFIG.BASE_URL}${endpoint}`;
+// Common API endpoints
+export const API_ENDPOINTS = {
+  USERS: '/api/users',
+  USERS_SEARCH: '/api/users/search',
+  USERS_BATCH: '/api/users/batch',
+  CONNECTIONS: '/api/connections',
+  CONNECTIONS_REQUEST: '/api/connections/request',
+  CONNECTIONS_ACCEPT: '/api/connections/accept',
+  CONNECTIONS_DECLINE: '/api/connections/decline',
+  CONNECTIONS_CANCEL: '/api/connections/cancel',
+  MESSAGES: '/api/messages',
+  CALLS_START: '/api/calls/start',
+  CHATS_ARCHIVED: '/api/chats/archived',
 };
 
-// Helper function for API requests with auth
+// Helper for authenticated requests
 export const apiRequest = async (
-  endpoint: string, 
+  path: string, 
   options: RequestInit & { token?: string }
 ): Promise<Response> => {
   const { token, ...fetchOptions } = options;
@@ -37,13 +37,8 @@ export const apiRequest = async (
     ...fetchOptions.headers,
   };
 
-  return fetch(buildApiUrl(endpoint), {
+  return fetch(getApiUrl(path), {
     ...fetchOptions,
     headers,
   });
-};
-
-// Alternative helper for direct URL construction (similar to NEXT_PUBLIC_URL pattern)
-export const getApiUrl = (path: string): string => {
-  return `${API_CONFIG.BASE_URL}${path}`;
 };
