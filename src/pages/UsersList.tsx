@@ -12,6 +12,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useConnections } from "@/hooks/useConnections";
 import { Search, Inbox, Users, AlertCircle } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
+import { API_CONFIG, apiRequest } from "@/config/api";
 
 const UsersList = () => {
   const { currentUser, userToken } = useAuth();
@@ -36,12 +37,9 @@ const UsersList = () => {
     setApiError(null);
     try {
       console.log('Loading user connections...');
-      const response = await fetch('/api/connections', {
+      const response = await apiRequest(API_CONFIG.ENDPOINTS.CONNECTIONS, {
         method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${userToken}`,
-          'Content-Type': 'application/json'
-        }
+        token: userToken,
       });
 
       if (!response.ok) {

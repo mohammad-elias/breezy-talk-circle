@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { MessageCircle, Users, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/sonner";
+import { API_CONFIG, apiRequest } from "@/config/api";
 
 interface User {
   id: string;
@@ -49,12 +50,9 @@ export function ConnectedUsersList() {
     setApiError(null);
     try {
       console.log('Loading connected users:', userIds);
-      const response = await fetch('/api/users/batch', {
+      const response = await apiRequest(API_CONFIG.ENDPOINTS.USERS_BATCH, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${userToken}`,
-          'Content-Type': 'application/json'
-        },
+        token: userToken,
         body: JSON.stringify({
           userIds: userIds
         })

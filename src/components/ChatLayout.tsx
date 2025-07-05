@@ -11,6 +11,7 @@ import { TestCredentials } from "./TestCredentials";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { API_CONFIG, apiRequest } from "@/config/api";
 
 export function ChatLayout() {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
@@ -43,12 +44,9 @@ export function ChatLayout() {
     setMessagesApiError(null);
     try {
       console.log('Loading messages...');
-      const response = await fetch('/api/messages', {
+      const response = await apiRequest(API_CONFIG.ENDPOINTS.MESSAGES, {
         method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${userToken}`,
-          'Content-Type': 'application/json'
-        }
+        token: userToken,
       });
 
       if (!response.ok) {
@@ -83,12 +81,9 @@ export function ChatLayout() {
     setUsersApiError(null);
     try {
       console.log('Loading users...');
-      const response = await fetch('/api/users', {
+      const response = await apiRequest(API_CONFIG.ENDPOINTS.USERS, {
         method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${userToken}`,
-          'Content-Type': 'application/json'
-        }
+        token: userToken,
       });
 
       if (!response.ok) {
@@ -142,12 +137,9 @@ export function ChatLayout() {
     try {
       console.log('Sending message:', text);
       // Send message to API
-      const response = await fetch('/api/messages', {
+      const response = await apiRequest(API_CONFIG.ENDPOINTS.MESSAGES, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${userToken}`,
-          'Content-Type': 'application/json'
-        },
+        token: userToken,
         body: JSON.stringify({
           text: text,
           timestamp: newMessage.timestamp
