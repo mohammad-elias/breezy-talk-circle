@@ -42,3 +42,8 @@ export const apiRequest = async (
     headers,
   });
 };
+
+// Alternative helper for direct URL construction (similar to NEXT_PUBLIC_URL pattern)
+export const getApiUrl = (path: string): string => {
+  return `${API_CONFIG.BASE_URL}${path}`;
+};
